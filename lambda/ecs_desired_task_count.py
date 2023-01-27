@@ -1,4 +1,5 @@
 import logging
+import os
 
 import boto3
 
@@ -9,8 +10,8 @@ def handler(event, context):
 
     # get status, but if not found, default to stop
     status = event.get("action", "stop")
-    cluster_arn = event["cluster"]
-    service_name = event["service_name"]
+    cluster_arn = os.environ["ECS_CLUSTER_ARN"]
+    service_name = os.environ["ECS_SERVICE_ARN"]
 
     logger.info(f"received {status} for {cluster_arn} and service {service_name}")
 

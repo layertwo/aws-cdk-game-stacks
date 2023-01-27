@@ -1,4 +1,5 @@
 import logging
+import os
 
 import boto3
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 def handler(event, context):
     # get status, but if not found, default to stop
     status = event.get("action", "stop")
-    asg = event["asg"]
+    asg = os.environ["AUTOSCALING_GROUP_NAME"]
 
     logger.info(f"received {status} for {asg}")
 

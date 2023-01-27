@@ -208,13 +208,12 @@ class GameStack(Stack):
     @cached_property
     def hosted_zone(self):
         """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_hosted_zone_id(
-            self, "HostedZone", self.props.hosted_zone
-        )
+        return route53.HostedZone.from_hosted_zone_id(self, "HostedZone", self.props.hosted_zone)
 
     def create_dns_update_lambda(self) -> _lambda.Function:
         """Lambda that updates route 53 dns"""
         name = f"{self.props.name}DnsUpdateLambda"
+        hostname = self.props.hostname or self.props.name
         function = build_lambda_function(
             scope=self,
             name=name,
@@ -225,14 +224,15 @@ class GameStack(Stack):
                 ec2_instances_read(resources=["*"]),
                 ecs_cluster_read_policy(resources=[self.cluster.cluster_arn]),
             ],
+            environment={
+                "HOSTNAME": hostname.lower(),
+                "HOSTED_ZONE": self.hosted_zone.hosted_zone_arn,
+            },
         )
-        hostname = self.props.hostname or self.props.name
+
         self._ecs_task_rule.add_target(
             targets.LambdaFunction(
                 handler=function,
-                event=events.RuleTargetInput.from_object(
-                    {"hostname": hostname.lower(), "hosted_zone": self.hosted_zone.hosted_zone_arn}
-                ),
             ),
         )
         return function
@@ -250,6 +250,10 @@ class GameStack(Stack):
                 ecs_cluster_read_policy(resources=[self.cluster.cluster_arn]),
                 ecs_cluster_update_policy(resources=[self.cluster.cluster_arn]),
             ],
+            environment={
+                "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
+                "ECS_SERVICE_NAME": self.service.service_name,
+            },
         )
 
     @cached_property
@@ -264,6 +268,8 @@ class GameStack(Stack):
             initial_policy=[
                 asg_update_policy(resources=[self.asg.auto_scaling_group_arn]),
             ],
+            # TODO should this ARN instead?
+            environment={"AUTOSCALING_GROUP_NAME": self.asg.auto_scaling_group_name},
         )
 
     def create_lambda_start_stop_rule(
@@ -286,19 +292,11 @@ class GameStack(Stack):
                 targets=[
                     targets.LambdaFunction(
                         handler=self.ecs_update_lambda,
-                        event=events.RuleTargetInput.from_object(
-                            {
-                                "action": action,
-                                "cluster": self.cluster.cluster_arn,
-                                "service_name": self.service.service_name,
-                            }
-                        ),
+                        event=events.RuleTargetInput.from_object({"action": action}),
                     ),
                     targets.LambdaFunction(
                         handler=self.asg_update_lambda,
-                        event=events.RuleTargetInput.from_object(
-                            {"action": action, "asg": self.asg.auto_scaling_group_name}
-                        ),
+                        event=events.RuleTargetInput.from_object({"action": action}),
                     ),
                 ],
             )

@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List
 
 from boto3.session import Session
@@ -9,8 +10,8 @@ logger = logging.getLogger(__name__)
 def handler(event, context) -> None:
     """Update DNS for Fargate Container"""
     session = Session()
-    hostname = event["hostname"]
-    hosted_zone = event["hosted_zone"]
+    hostname = os.environ["HOSTNAME"]
+    hosted_zone = os.environ["HOSTED_ZONE"]
 
     eni = get_eni_id(attachments=event["detail"]["attachments"])
     ip = get_eip_from_eni(session=session, eni=eni)
