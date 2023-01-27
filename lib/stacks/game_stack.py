@@ -273,7 +273,7 @@ class GameStack(Stack):
         """Lambda that updates cluster desired count"""
 
         rule_config = {
-            "start": events.Schedule.cron(minute="0", hour="22", week_day="FRI"),  # Friday 3PM PST
+            "start": events.Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
             "stop": events.Schedule.cron(minute="0", hour="6", week_day="MON"),  # Sunday 10PM PST
         }
 
