@@ -1,0 +1,8 @@
+# aws
+aws-cdk-lib==2.62.2
+constructs==10.1.232
+boto3==1.26.59
+
+# linting
+black==22.12.0
+isort==5.11.4
