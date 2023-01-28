@@ -11,7 +11,7 @@ def handler(event, context):
     # get status, but if not found, default to stop
     status = event.get("action", "stop")
     cluster_arn = os.environ["ECS_CLUSTER_ARN"]
-    service_name = os.environ["ECS_SERVICE_ARN"]
+    service_name = os.environ["ECS_SERVICE_NAME"]
 
     logger.info(f"received {status} for {cluster_arn} and service {service_name}")
 

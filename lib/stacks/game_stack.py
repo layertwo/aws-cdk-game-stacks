@@ -195,9 +195,11 @@ class GameStack(Stack):
     @cached_property
     def _ecs_task_rule(self) -> events.Rule:
         """Create a rule to listen for ECS Task State Changes"""
+        name = f"{self.props.name}EcsRunningTaskRule"
         return events.Rule(
             self,
-            f"{self.props.name}EcsRunningTaskRule",
+            name,
+            rule_name=name,
             event_pattern=events.EventPattern(
                 source=["aws.ecs"],
                 detail_type=["ECS Task State Change"],
@@ -222,7 +224,9 @@ class GameStack(Stack):
             initial_policy=[
                 r53_update_policy(resources=[self.hosted_zone.hosted_zone_arn]),
                 ec2_instances_read(resources=["*"]),
-                ecs_cluster_read_policy(resources=[self.cluster.cluster_arn]),
+                ecs_cluster_read_policy(
+                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                ),
             ],
             environment={
                 "HOSTNAME": hostname.lower(),
@@ -247,8 +251,12 @@ class GameStack(Stack):
             function_name=name,
             handler="ecs_desired_task_count.handler",
             initial_policy=[
-                ecs_cluster_read_policy(resources=[self.cluster.cluster_arn]),
-                ecs_cluster_update_policy(resources=[self.cluster.cluster_arn]),
+                ecs_cluster_read_policy(
+                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                ),
+                ecs_cluster_update_policy(
+                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                ),
             ],
             environment={
                 "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
@@ -284,9 +292,11 @@ class GameStack(Stack):
         }
 
         for action, schedule in rule_config.items():
+            name = f"{self.props.name}{action.capitalize()}Rule"
             events.Rule(
                 self,
-                f"{self.props.name}{action.capitalize()}Rule",
+                name,
+                rule_name=name,
                 schedule=schedule,
                 enabled=enabled,
                 targets=[
