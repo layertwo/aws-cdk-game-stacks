@@ -1,0 +1,20 @@
+name: Python formatting and linting
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+    - name: Black
+      run: black --check lib/ lambda/
+    - name: Isort
+      run: isort --check lib/ lambda/
+#    - name: Mypy
+#      run: mypy lambda/
