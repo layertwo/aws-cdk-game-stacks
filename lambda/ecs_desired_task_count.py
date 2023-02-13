@@ -4,10 +4,10 @@ import os
 import boto3
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def handler(event, context):
-
     # get status, but if not found, default to stop
     status = event.get("action", "stop")
     cluster_arn = os.environ["ECS_CLUSTER_ARN"]

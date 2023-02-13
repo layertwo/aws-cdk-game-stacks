@@ -10,9 +10,7 @@ from lib.aws_common.ec2 import create_security_group
 def build_efs_file_system(
     scope: Construct, vpc: ec2.Vpc, name: str, **kwargs: Any
 ) -> efs.FileSystem:
-
     if not kwargs.get("security_group", ""):
-
         sg = create_security_group(scope=scope, vpc=vpc, name=f"{name}Efs", allow_all_outbound=True)
 
         # can we better scope to less than the whole vpc?

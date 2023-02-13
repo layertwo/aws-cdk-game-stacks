@@ -212,8 +212,18 @@ class GameStack(Stack):
         """Import HostedZone into stack for setting DNS"""
         return route53.HostedZone.from_hosted_zone_id(self, "HostedZone", self.props.hosted_zone)
 
+    @cached_property
+    def container_instances_arn(self) -> str:
+        # setup ARNs for cluster and container instances
+        return Stack.of(self).format_arn(
+            service="ecs",
+            resource="container-instance",
+            resource_name=f"{self.cluster.cluster_name}/*",
+        )
+
     def create_dns_update_lambda(self) -> _lambda.Function:
         """Lambda that updates route 53 dns"""
+
         name = f"{self.props.name}DnsUpdateLambda"
         hostname = self.props.hostname or self.props.name
         function = build_lambda_function(
@@ -225,7 +235,11 @@ class GameStack(Stack):
                 r53_update_policy(resources=[self.hosted_zone.hosted_zone_arn]),
                 ec2_instances_read(resources=["*"]),
                 ecs_cluster_read_policy(
-                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                    resources=[
+                        self.cluster.cluster_arn,
+                        self.service.service_arn,
+                        self.container_instances_arn,
+                    ]
                 ),
             ],
             environment={
