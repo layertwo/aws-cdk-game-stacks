@@ -1,5 +1,5 @@
 # aws
-aws-cdk-lib==2.64.0
+aws-cdk-lib==2.66.1
 constructs==10.1.255
 boto3==1.26.74
 
