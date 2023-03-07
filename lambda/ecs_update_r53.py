@@ -119,7 +119,7 @@ def update_dns_with_ip(session: Session, hosted_zone: str, fqdn: str, ip: str):
                         "ResourceRecordSet": {
                             "Name": fqdn,
                             "Type": "A",
-                            "TTL": 180,
+                            "TTL": 60,
                             "ResourceRecords": [{"Value": ip}],
                         },
                     }
