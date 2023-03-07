@@ -53,7 +53,7 @@ class GameStack(Stack):
         self.service = self.create_service()
 
         if self.props.auto_start:
-            self.create_lambda_start_stop_rule(enabled=self.props.auto_start)
+            self.create_lambda_start_stop_rule()
 
         if self.props.hosted_zone:
             self.create_dns_update_lambda()
@@ -294,15 +294,12 @@ class GameStack(Stack):
             environment={"AUTOSCALING_GROUP_NAME": self.asg.auto_scaling_group_name},
         )
 
-    def create_lambda_start_stop_rule(
-        self,
-        enabled: bool,
-    ) -> None:
+    def create_lambda_start_stop_rule(self) -> None:
         """Lambda that updates cluster desired count"""
 
         rule_config = {
-            "start": events.Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
-            "stop": events.Schedule.cron(minute="0", hour="6", week_day="MON"),  # Sunday 10PM PST
+            "start": self.props.start_time,
+            "stop": self.props.stop_time,
         }
 
         for action, schedule in rule_config.items():
@@ -312,7 +309,7 @@ class GameStack(Stack):
                 name,
                 rule_name=name,
                 schedule=schedule,
-                enabled=enabled,
+                enabled=self.props.auto_start,
                 targets=[
                     targets.LambdaFunction(
                         handler=self.ecs_update_lambda,
