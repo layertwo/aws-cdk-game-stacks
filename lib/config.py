@@ -38,9 +38,15 @@ class GameProperties:
 
 
 ESSENTIALS_VER = "2.19.7"
-ESSENTIALS_URL = f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}"
-ESSENTIALS_PLUGINS = ["EssentialsX", "EssentialsXChat"]
-MODS = ",".join(f"{ESSENTIALS_URL}/{p}-{ESSENTIALS_VER}.jar" for p in ESSENTIALS_PLUGINS)
+VOXEL_SNIPER_VER = "8.4.3"
+
+MODS = [
+    f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsX-{ESSENTIALS_VER}.jar",
+    f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXChat-{ESSENTIALS_VER}.jar",
+    f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
+    "https://mediafilez.forgecdn.net/files/4162/203/worldedit-bukkit-7.2.13.jar",
+]
+
 
 ALL_GAME_PROPS = [
     GameProperties(
@@ -55,7 +61,7 @@ ALL_GAME_PROPS = [
             "MAX_MEMORY": "6144M",
             "MAX_TICK_TIME": "60000",
             "SPIGET_RESOURCES": "390",
-            "MODS": MODS,
+            "MODS": ",".join(MODS),
         },
         auto_start=True,
         start_time=Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
