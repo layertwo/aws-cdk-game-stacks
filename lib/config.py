@@ -43,7 +43,7 @@ VOXEL_SNIPER_VER = "8.4.3"
 MODS = [
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsX-{ESSENTIALS_VER}.jar",
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXChat-{ESSENTIALS_VER}.jar",
-    f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
+    f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/v{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
     "https://mediafilez.forgecdn.net/files/4162/203/worldedit-bukkit-7.2.13.jar",
 ]
 
