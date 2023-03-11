@@ -3,6 +3,7 @@ aws-cdk-lib==2.67.0
 constructs==10.1.265
 boto3==1.26.81
 cron-converter==1.0.1
+awsipranges==0.3.3
 
 # linting
 black==23.1.0

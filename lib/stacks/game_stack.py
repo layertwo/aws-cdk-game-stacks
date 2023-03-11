@@ -1,5 +1,6 @@
 from functools import cached_property
 
+import awsipranges
 from aws_cdk import Duration, Stack
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -68,7 +69,7 @@ class GameStack(Stack):
             max_capacity=1,
             instance_type=ec2.InstanceType("t3a.large"),
             machine_image=ecs.EcsOptimizedImage.amazon_linux2(),
-            security_group=self.game_security_group,
+            security_group=self.instance_security_group,
             spot_price="0.03",
             instance_monitoring=autoscaling.Monitoring.BASIC,
             new_instances_protected_from_scale_in=False,
@@ -82,13 +83,13 @@ class GameStack(Stack):
         )
 
         sg.add_ingress_rule(
-            ec2.Peer.security_group_id(self.game_security_group.security_group_id),
+            ec2.Peer.security_group_id(self.instance_security_group.security_group_id),
             ec2.Port.tcp(2049),
         )
         return sg
 
     @cached_property
-    def game_security_group(self) -> ec2.SecurityGroup:
+    def instance_security_group(self) -> ec2.SecurityGroup:
         """Create game security group with ports from GameProperties"""
         sg = create_security_group(
             scope=self, vpc=self.vpc, name=f"{self.props.name}Game", allow_all_outbound=True
@@ -106,6 +107,17 @@ class GameStack(Stack):
                 ec2.Port.udp(port),
                 f"{self.props.name} port udp/{port} from anywhere",
             )
+
+        # Allow EC2 Instance Connect
+        if self.props.instance_connect:
+            ranges = awsipranges.get_ranges()
+            for prefix in ranges.filter(regions=self.region, services="EC2_INSTANCE_CONNECT"):
+                ip_range = str(prefix.ip_prefix)
+                sg.add_ingress_rule(
+                    ec2.Peer.ipv4(ip_range),
+                    ec2.Port.all_tcp(),
+                    description=f"SSH inbound from EC2 Instance Connect ({prefix.region}) / {ip_range}",
+                )
         return sg
 
     def create_service(self) -> ecs.Ec2Service:

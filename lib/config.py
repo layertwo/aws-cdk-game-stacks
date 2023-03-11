@@ -22,6 +22,7 @@ class GameProperties:
     start_time: Optional[Schedule] = None
     stop_time: Optional[Schedule] = None
     enabled: bool = True
+    instance_connect: bool = False
 
     @cached_property
     def is_operational(self) -> bool:
@@ -67,5 +68,6 @@ ALL_GAME_PROPS = [
         start_time=Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
         stop_time=Schedule.cron(minute="0", hour="6", week_day="MON"),  # Sunday 10PM PST
         hosted_zone="Z09871391DBKPQ6VVS5KY",
+        instance_connect=True,
     )
 ]
