@@ -2,6 +2,8 @@ from aws_cdk.aws_events import Schedule
 
 from lib.config import GameProperties
 
+EMAIL = "aws+minecraft@layertwo.dev"
+
 ESSENTIALS_VER = "2.19.7"
 VOXEL_SNIPER_VER = "8.4.3"
 
@@ -18,7 +20,7 @@ MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
     container_image="itzg/minecraft-server:java17-jdk",
     container_path="/data",
-    tcp_ports=[25565, 8123],
+    tcp_ports=[25565],
     environment={
         "TYPE": "PAPER",
         "EULA": "TRUE",
@@ -31,7 +33,6 @@ MINECRAFT_PROPS = GameProperties(
     auto_start=True,
     start_time=Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
     stop_time=Schedule.cron(minute="0", hour="6", week_day="MON"),  # Sunday 10PM PST
-    # hosted_zone="Z09871391DBKPQ6VVS5KY",
     domain_name="g.layertwo.dev",
     instance_connect=True,
 )
