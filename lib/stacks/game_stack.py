@@ -56,7 +56,7 @@ class GameStack(Stack):
         if self.props.auto_start:
             self.create_lambda_start_stop_rule()
 
-        if self.props.hosted_zone:
+        if self.props.domain_name:
             self.create_dns_update_lambda()
 
     @cached_property
@@ -222,7 +222,7 @@ class GameStack(Stack):
     @cached_property
     def hosted_zone(self):
         """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_hosted_zone_id(self, "HostedZone", self.props.hosted_zone)
+        return route53.HostedZone.from_lookup(self, "HostedZone", domain_name=self.props.domain_name)
 
     @cached_property
     def container_instances_arn(self) -> str:
@@ -232,12 +232,15 @@ class GameStack(Stack):
             resource="container-instance",
             resource_name=f"{self.cluster.cluster_name}/*",
         )
+    @cached_property
+    def hostname(self) -> str:
+        return (self.props.hostname or self.props.name).lower()
 
     def create_dns_update_lambda(self) -> _lambda.Function:
         """Lambda that updates route 53 dns"""
 
         name = f"{self.props.name}DnsUpdateLambda"
-        hostname = self.props.hostname or self.props.name
+
         function = build_lambda_function(
             scope=self,
             name=name,
@@ -255,7 +258,7 @@ class GameStack(Stack):
                 ),
             ],
             environment={
-                "HOSTNAME": hostname.lower(),
+                "HOSTNAME": self.hostname,
                 "HOSTED_ZONE": self.hosted_zone.hosted_zone_arn,
             },
         )
