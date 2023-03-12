@@ -222,7 +222,9 @@ class GameStack(Stack):
     @cached_property
     def hosted_zone(self):
         """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_lookup(self, "HostedZone", domain_name=self.props.domain_name)
+        return route53.HostedZone.from_lookup(
+            self, "HostedZone", domain_name=self.props.domain_name
+        )
 
     @cached_property
     def container_instances_arn(self) -> str:
@@ -232,6 +234,7 @@ class GameStack(Stack):
             resource="container-instance",
             resource_name=f"{self.cluster.cluster_name}/*",
         )
+
     @cached_property
     def hostname(self) -> str:
         return (self.props.hostname or self.props.name).lower()
