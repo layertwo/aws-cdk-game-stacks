@@ -56,7 +56,7 @@ class GameStack(Stack):
         if self.props.auto_start:
             self.create_lambda_start_stop_rule()
 
-        if self.props.hosted_zone:
+        if self.props.domain_name:
             self.create_dns_update_lambda()
 
     @cached_property
@@ -122,26 +122,24 @@ class GameStack(Stack):
 
     def create_service(self) -> ecs.Ec2Service:
         """Create a Ec2Service"""
+        self._create_container()
         service = ecs.Ec2Service(
             self,
             f"{self.props.name}-service",
             cluster=self.cluster,
-            task_definition=self._create_task(),
+            task_definition=self.task,
             desired_count=1 if self.props.is_operational else 0,
         )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
 
-    def _create_task(self) -> ecs.Ec2TaskDefinition:
-        """
-        Create an ECS task for the specified
-        """
-        volume = self.create_efs_volume(self.props.name)
-        task = ecs.Ec2TaskDefinition(
-            self, f"{self.props.name}-td", volumes=[volume], network_mode=ecs.NetworkMode.HOST
-        )
+    @cached_property
+    def efs_volume(self) -> ecs.Volume:
+        return self.create_efs_volume(self.props.name)
+
+    def _create_container(self) -> ecs.ContainerDefinition:
         container = build_container(
-            task=task,
+            task=self.task,
             name=self.props.name,
             container_image=self.props.container_image,
             cpu=2048,
@@ -161,11 +159,22 @@ class GameStack(Stack):
         container.add_mount_points(
             ecs.MountPoint(
                 container_path=self.props.container_path,
-                source_volume=volume.name,
+                source_volume=self.efs_volume.name,
                 read_only=False,
             )
         )
-        return task
+
+    @cached_property
+    def task(self) -> ecs.Ec2TaskDefinition:
+        """
+        Create an ECS task for the specified
+        """
+        return ecs.Ec2TaskDefinition(
+            self,
+            f"{self.props.name}-td",
+            volumes=[self.efs_volume],
+            network_mode=ecs.NetworkMode.HOST,
+        )
 
     def _create_efs_backup(self, name: str, file_system: efs.FileSystem) -> backup.BackupPlan:
         plan = backup.BackupPlan(
@@ -222,7 +231,9 @@ class GameStack(Stack):
     @cached_property
     def hosted_zone(self):
         """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_hosted_zone_id(self, "HostedZone", self.props.hosted_zone)
+        return route53.HostedZone.from_lookup(
+            self, "HostedZone", domain_name=self.props.domain_name
+        )
 
     @cached_property
     def container_instances_arn(self) -> str:
@@ -233,11 +244,19 @@ class GameStack(Stack):
             resource_name=f"{self.cluster.cluster_name}/*",
         )
 
+    @cached_property
+    def hostname(self) -> str:
+        return (self.props.hostname or self.props.name).lower()
+
+    @cached_property
+    def fqdn(self) -> str:
+        return f"{self.hostname}.{self.props.domain_name}"
+
     def create_dns_update_lambda(self) -> _lambda.Function:
         """Lambda that updates route 53 dns"""
 
         name = f"{self.props.name}DnsUpdateLambda"
-        hostname = self.props.hostname or self.props.name
+
         function = build_lambda_function(
             scope=self,
             name=name,
@@ -255,7 +274,7 @@ class GameStack(Stack):
                 ),
             ],
             environment={
-                "HOSTNAME": hostname.lower(),
+                "HOSTNAME": self.hostname,
                 "HOSTED_ZONE": self.hosted_zone.hosted_zone_arn,
             },
         )
