@@ -1,7 +1,7 @@
 from functools import cached_property
 
 import awsipranges
-from aws_cdk import Duration, Stack
+from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
 from aws_cdk import aws_ec2 as ec2
@@ -58,6 +58,9 @@ class GameStack(Stack):
 
         if self.props.domain_name:
             self.create_dns_update_lambda()
+
+        # add tags to game stack
+        Tags.of(self).add("game", self.props.name.lower())
 
     @cached_property
     def asg(self) -> autoscaling.AutoScalingGroup:
