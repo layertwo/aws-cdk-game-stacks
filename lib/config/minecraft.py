@@ -29,6 +29,11 @@ MINECRAFT_PROPS = GameProperties(
         "MAX_TICK_TIME": "60000",
         "SPIGET_RESOURCES": "390",
         "MODS": ",".join(MODS),
+        "ENABLE_QUERY": "false",
+        "MAX_WORLD_SIZE": "10000",
+        "MAX_PLAYERS": "10",
+        "SNOOPER_ENABLED": "FALSE",
+        "ENABLE_ROLLING_LOGS": "TRUE",
     },
     auto_start=True,
     start_time=Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
