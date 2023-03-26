@@ -24,7 +24,7 @@ MINECRAFT_PROPS = GameProperties(
     environment={
         "TYPE": "PAPER",
         "EULA": "TRUE",
-        "VERSION": "1.19.3",
+        "VERSION": "1.19.4",
         "MAX_MEMORY": "6144M",
         "MAX_TICK_TIME": "60000",
         "SPIGET_RESOURCES": "390",
