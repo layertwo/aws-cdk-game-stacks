@@ -55,7 +55,8 @@ class GameStack(Stack):
         self.service = self.create_service()
 
         if self.props.auto_start:
-            self.create_lambda_start_stop_rule()
+            self._create_asg_scheduled_actions()
+            # self.create_lambda_start_stop_rule()
 
         if self.props.domain_name:
             self.create_dns_update_lambda()
@@ -85,6 +86,23 @@ class GameStack(Stack):
             new_instances_protected_from_scale_in=False,
             capacity_rebalance=True,
             require_imdsv2=True,
+        )
+
+    def _create_asg_scheduled_actions(self) -> None:
+        autoscaling.ScheduledAction(
+            self,
+            f"{self.props.name}AsgStartAction",
+            auto_scaling_group=self.asg,
+            schedule=autoscaling.Schedule.expression(self.props.start_time),
+            desired_capacity=1,
+        )
+
+        autoscaling.ScheduledAction(
+            self,
+            f"{self.props.name}AsgStopAction",
+            auto_scaling_group=self.asg,
+            schedule=autoscaling.Schedule.expression(self.props.stop_time),
+            desired_capacity=0,
         )
 
     @cached_property
@@ -351,7 +369,7 @@ class GameStack(Stack):
                 self,
                 name,
                 rule_name=name,
-                schedule=schedule,
+                schedule=events.Schedule.expression(schedule),
                 enabled=self.props.auto_start,
                 targets=[
                     targets.LambdaFunction(

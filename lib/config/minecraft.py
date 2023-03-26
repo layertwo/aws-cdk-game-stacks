@@ -1,5 +1,3 @@
-from aws_cdk.aws_events import Schedule
-
 from lib.config import GameProperties
 
 EMAIL = "aws+minecraft@layertwo.dev"
@@ -36,8 +34,8 @@ MINECRAFT_PROPS = GameProperties(
         "ENABLE_ROLLING_LOGS": "TRUE",
     },
     auto_start=True,
-    start_time=Schedule.cron(minute="0", hour="23", week_day="FRI"),  # Friday 3PM PST
-    stop_time=Schedule.cron(minute="0", hour="6", week_day="MON"),  # Sunday 10PM PST
+    start_time="0 23 * * FRI",  # Friday 3PM PST
+    stop_time="0 6 * * MON",  # Sunday 10PM PST,
     domain_name="g.layertwo.dev",
     instance_type="t4g.large",
     instance_connect=True,
