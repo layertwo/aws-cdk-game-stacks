@@ -254,7 +254,11 @@ class GameStack(Stack):
             event_pattern=events.EventPattern(
                 source=["aws.ecs"],
                 detail_type=["ECS Task State Change"],
-                detail={"desiredStatus": ["RUNNING"], "lastStatus": ["RUNNING"]},
+                detail={
+                    "desiredStatus": ["RUNNING"],
+                    "lastStatus": ["RUNNING"],
+                    "clusterArn": [self.cluster.cluster_arn],
+                },
             ),
         )
 
