@@ -22,6 +22,7 @@ class GameProperties:
     start_time: Optional[Schedule] = None
     stop_time: Optional[Schedule] = None
     enabled: bool = True
+    instance_type: str = "t3a.large"
     instance_connect: bool = False
 
     @cached_property

@@ -71,7 +71,7 @@ class GameStack(Stack):
             vpc=self.vpc,
             min_capacity=0,
             max_capacity=1,
-            instance_type=ec2.InstanceType("t3a.large"),
+            instance_type=ec2.InstanceType(self.props.instance_type),
             machine_image=ecs.EcsOptimizedImage.amazon_linux2(),
             security_group=self.instance_security_group,
             spot_price="0.03",
