@@ -77,6 +77,8 @@ class GameStack(Stack):
             spot_price="0.03",
             instance_monitoring=autoscaling.Monitoring.BASIC,
             new_instances_protected_from_scale_in=False,
+            capacity_rebalance=True,
+            require_imdsv2=True,
         )
 
     @cached_property
