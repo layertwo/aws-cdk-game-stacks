@@ -44,6 +44,7 @@ class GameStack(Stack):
                     cidr_mask=24,
                 ),
             ],
+            max_azs=99,
         )
         self.cluster = ecs.Cluster(self, f"{self.props.name}Cluster", vpc=self.vpc)
         capacity_provider = ecs.AsgCapacityProvider(
