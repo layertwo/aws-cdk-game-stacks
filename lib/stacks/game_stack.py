@@ -65,14 +65,20 @@ class GameStack(Stack):
 
     @cached_property
     def asg(self) -> autoscaling.AutoScalingGroup:
+        instance_type = ec2.InstanceType(self.props.instance_type)
+        hardware_type = (
+            ecs.AmiHardwareType.ARM
+            if instance_type.architecture == ec2.InstanceArchitecture.ARM_64
+            else ecs.AmiHardwareType.STANDARD
+        )
         return autoscaling.AutoScalingGroup(
             self,
             f"{self.props.name}Asg",
             vpc=self.vpc,
             min_capacity=0,
             max_capacity=1,
-            instance_type=ec2.InstanceType(self.props.instance_type),
-            machine_image=ecs.EcsOptimizedImage.amazon_linux2(),
+            instance_type=instance_type,
+            machine_image=ecs.EcsOptimizedImage.amazon_linux2(hardware_type),
             security_group=self.instance_security_group,
             spot_price="0.03",
             instance_monitoring=autoscaling.Monitoring.BASIC,
