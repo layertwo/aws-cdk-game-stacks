@@ -3,14 +3,15 @@ from lib.config import GameProperties
 EMAIL = "aws+minecraft@layertwo.dev"
 
 ESSENTIALS_VER = "2.19.7"
-VOXEL_SNIPER_VER = "8.4.3"
+VOXEL_SNIPER_VER = "8.6.0"
 
 MODS = [
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsX-{ESSENTIALS_VER}.jar",
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXChat-{ESSENTIALS_VER}.jar",
+    f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXSpawn-{ESSENTIALS_VER}.jar",
     f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/v{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
-    "https://mediafilez.forgecdn.net/files/4162/203/worldedit-bukkit-7.2.13.jar",
-    "https://mediafilez.forgecdn.net/files/4371/728/Dynmap-3.5-beta-2-spigot.jar",
+    "https://mediafilez.forgecdn.net/files/4445/117/worldedit-bukkit-7.2.14.jar",
+    "https://mediafilez.forgecdn.net/files/3934/649/Dynmap-3.4-spigot.jar",
 ]
 
 
