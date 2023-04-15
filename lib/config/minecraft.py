@@ -12,6 +12,7 @@ MODS = [
     f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/v{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
     "https://mediafilez.forgecdn.net/files/4445/117/worldedit-bukkit-7.2.14.jar",
     "https://mediafilez.forgecdn.net/files/3934/649/Dynmap-3.4-spigot.jar",
+    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.2.0/CloudWatch-1.2.0.jar",
 ]
 
 

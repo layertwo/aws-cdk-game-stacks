@@ -3,6 +3,7 @@ from functools import cached_property
 from aws_cdk import Duration
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
@@ -19,6 +20,7 @@ class MinecraftStack(GameStack):
         super().__init__(scope, props, **kwargs)
         self.minecraft_srv_record()
         self.traefik_container()
+        self.add_metric_to_task_role()
 
     def _create_container(self) -> ecs.ContainerDefinition:
         """
@@ -105,3 +107,9 @@ class MinecraftStack(GameStack):
 
         self.task.add_to_task_role_policy(ec2_instances_read(resources=["*"]))
         self.task.add_to_task_role_policy(ecs_cluster_read_policy(resources=["*"]))
+
+    def add_metric_to_task_role(self) -> None:
+        # allow task to publish cloudwatch metrics
+        self.task.add_to_task_role_policy(
+            iam.PolicyStatement(actions=["cloudwatch:PutMetricData"], resources=["*"])
+        )
