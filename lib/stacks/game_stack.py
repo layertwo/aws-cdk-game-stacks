@@ -81,7 +81,7 @@ class GameStack(Stack):
             instance_type=instance_type,
             machine_image=ecs.EcsOptimizedImage.amazon_linux2(hardware_type),
             security_group=self.instance_security_group,
-            spot_price="0.03",
+            spot_price="0.05",
             instance_monitoring=autoscaling.Monitoring.BASIC,
             new_instances_protected_from_scale_in=False,
             capacity_rebalance=True,
