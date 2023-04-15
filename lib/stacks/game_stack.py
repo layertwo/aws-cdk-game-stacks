@@ -158,7 +158,7 @@ class GameStack(Stack):
             f"{self.props.name}-service",
             cluster=self.cluster,
             task_definition=self.task,
-            desired_count=1 if self.props.is_operational else 0,
+            desired_count=1,
         )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
