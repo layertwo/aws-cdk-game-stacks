@@ -9,7 +9,7 @@ def build_lambda_function(scope, name: str, handler: str, **kwargs: Any) -> _lam
     return _lambda.Function(
         scope=scope,
         id=name,
-        runtime=_lambda.Runtime.PYTHON_3_9,
+        runtime=_lambda.Runtime.PYTHON_3_10,
         code=_lambda.Code.from_asset("./lambda"),
         handler=handler,
         timeout=Duration.minutes(1),
