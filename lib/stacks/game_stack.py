@@ -9,6 +9,7 @@ from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
 from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_route53 as route53
 from constructs import Construct
@@ -66,26 +67,17 @@ class GameStack(Stack):
 
     @cached_property
     def asg(self) -> autoscaling.AutoScalingGroup:
-        instance_type = ec2.InstanceType(self.props.instance_type)
-        hardware_type = (
-            ecs.AmiHardwareType.ARM
-            if instance_type.architecture == ec2.InstanceArchitecture.ARM_64
-            else ecs.AmiHardwareType.STANDARD
-        )
+        name = f"{self.props.name}Asg"
         return autoscaling.AutoScalingGroup(
             self,
-            f"{self.props.name}Asg",
+            name,
+            auto_scaling_group_name=name,
             vpc=self.vpc,
             min_capacity=0,
             max_capacity=1,
-            instance_type=instance_type,
-            machine_image=ecs.EcsOptimizedImage.amazon_linux2(hardware_type),
-            security_group=self.instance_security_group,
-            spot_price="0.05",
-            instance_monitoring=autoscaling.Monitoring.BASIC,
             new_instances_protected_from_scale_in=False,
             capacity_rebalance=True,
-            require_imdsv2=True,
+            launch_template=self._launch_template,
         )
 
     def _create_asg_scheduled_actions(self) -> None:
@@ -105,6 +97,31 @@ class GameStack(Stack):
             desired_capacity=0,
         )
 
+    @property
+    def _launch_template(self) -> ec2.LaunchTemplate:
+        instance_type = ec2.InstanceType(self.props.instance_type)
+        hardware_type = (
+            ecs.AmiHardwareType.ARM
+            if instance_type.architecture == ec2.InstanceArchitecture.ARM_64
+            else ecs.AmiHardwareType.STANDARD
+        )
+        name = f"{self.props.name}LaunchTemplate"
+        return ec2.LaunchTemplate(
+            self,
+            name,
+            launch_template_name=name,
+            instance_type=instance_type,
+            machine_image=ecs.EcsOptimizedImage.amazon_linux2(hardware_type),
+            security_group=self.instance_security_group,
+            spot_options=ec2.LaunchTemplateSpotOptions(
+                max_price=0.05, interruption_behavior=ec2.SpotInstanceInterruption.TERMINATE
+            ),
+            detailed_monitoring=False,
+            require_imdsv2=True,
+            role=self.instance_role,
+            user_data=ec2.UserData.for_linux(),
+        )
+
     @cached_property
     def game_efs_security_group(self) -> ec2.SecurityGroup:
         """Create game security group with ports from GameProperties"""
@@ -117,6 +134,13 @@ class GameStack(Stack):
             ec2.Port.tcp(2049),
         )
         return sg
+
+    @cached_property
+    def instance_role(self) -> iam.Role:
+        name = f"{self.props.name}InstanceRole"
+        return iam.Role(
+            self, name, role_name=name, assumed_by=iam.ServicePrincipal("ec2.amazonaws.com")
+        )
 
     @cached_property
     def instance_security_group(self) -> ec2.SecurityGroup:
