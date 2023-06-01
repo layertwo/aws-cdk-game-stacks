@@ -1,7 +1,7 @@
 # aws
 aws-cdk-lib==2.79.1
 constructs==10.2.25
-boto3==1.26.134
+boto3==1.26.144
 awsipranges==0.3.3
 
 # linting
