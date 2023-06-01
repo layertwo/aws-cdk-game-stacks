@@ -1,6 +1,6 @@
 # aws
 aws-cdk-lib==2.79.1
-constructs==10.2.25
+constructs==10.2.39
 boto3==1.26.134
 awsipranges==0.3.3
 
