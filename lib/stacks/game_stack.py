@@ -37,17 +37,17 @@ class GameStack(Stack):
         # setup VPC
         self.vpc = ec2.Vpc(
             self,
-            f"{props.name}Vpc",
+            self.qualify_name("Vpc"),
             subnet_configuration=[
                 ec2.SubnetConfiguration(
-                    name=f"{props.name}Public",
+                    name=self.qualify_name("Public"),
                     subnet_type=ec2.SubnetType.PUBLIC,
                     cidr_mask=24,
                 ),
             ],
             max_azs=99,
         )
-        self.cluster = ecs.Cluster(self, f"{self.props.name}Cluster", vpc=self.vpc)
+        self.cluster = ecs.Cluster(self, self.qualify_name("Cluster"), vpc=self.vpc)
         capacity_provider = ecs.AsgCapacityProvider(
             self, "AsgCapacityProvider", auto_scaling_group=self.asg
         )
@@ -65,9 +65,12 @@ class GameStack(Stack):
         # add tags to game stack
         Tags.of(self).add("game", self.props.name.lower())
 
+    def qualify_name(self, name: str) -> str:
+        return f"{self.props.name}{name}"
+
     @cached_property
     def asg(self) -> autoscaling.AutoScalingGroup:
-        name = f"{self.props.name}Asg"
+        name = self.qualify_name("Asg")
         return autoscaling.AutoScalingGroup(
             self,
             name,
@@ -83,7 +86,7 @@ class GameStack(Stack):
     def _create_asg_scheduled_actions(self) -> None:
         autoscaling.ScheduledAction(
             self,
-            f"{self.props.name}AsgStartAction",
+            self.qualify_name("AsgStartAction"),
             auto_scaling_group=self.asg,
             schedule=autoscaling.Schedule.expression(self.props.start_time),
             desired_capacity=1,
@@ -91,7 +94,7 @@ class GameStack(Stack):
 
         autoscaling.ScheduledAction(
             self,
-            f"{self.props.name}AsgStopAction",
+            self.qualify_name("AsgStopAction"),
             auto_scaling_group=self.asg,
             schedule=autoscaling.Schedule.expression(self.props.stop_time),
             desired_capacity=0,
@@ -105,7 +108,7 @@ class GameStack(Stack):
             if instance_type.architecture == ec2.InstanceArchitecture.ARM_64
             else ecs.AmiHardwareType.STANDARD
         )
-        name = f"{self.props.name}LaunchTemplate"
+        name = self.qualify_name("LaunchTemplate")
         return ec2.LaunchTemplate(
             self,
             name,
@@ -126,7 +129,7 @@ class GameStack(Stack):
     def game_efs_security_group(self) -> ec2.SecurityGroup:
         """Create game security group with ports from GameProperties"""
         sg = create_security_group(
-            scope=self, vpc=self.vpc, name=f"{self.props.name}Efs", allow_all_outbound=True
+            scope=self, vpc=self.vpc, name=self.qualify_name("Efs"), allow_all_outbound=True
         )
 
         sg.add_ingress_rule(
@@ -137,7 +140,7 @@ class GameStack(Stack):
 
     @cached_property
     def instance_role(self) -> iam.Role:
-        name = f"{self.props.name}InstanceRole"
+        name = self.qualify_name("InstanceRole")
         return iam.Role(
             self, name, role_name=name, assumed_by=iam.ServicePrincipal("ec2.amazonaws.com")
         )
@@ -146,7 +149,7 @@ class GameStack(Stack):
     def instance_security_group(self) -> ec2.SecurityGroup:
         """Create game security group with ports from GameProperties"""
         sg = create_security_group(
-            scope=self, vpc=self.vpc, name=f"{self.props.name}Game", allow_all_outbound=True
+            scope=self, vpc=self.vpc, name=self.qualify_name("Game"), allow_all_outbound=True
         )
         for port in self.props.tcp_ports:
             sg.add_ingress_rule(
@@ -179,7 +182,9 @@ class GameStack(Stack):
         self._create_container()
         service = ecs.Ec2Service(
             self,
-            f"{self.props.name}-service",
+            # TODO set cluster and resource name
+            # update to be PascalCase
+            self.qualify_name("-service"),
             cluster=self.cluster,
             task_definition=self.task,
             desired_count=1,
@@ -189,11 +194,12 @@ class GameStack(Stack):
 
     @cached_property
     def efs_volume(self) -> ecs.Volume:
-        return self.create_efs_volume(self.props.name)
+        return self.create_efs_volume()
 
     def _create_container(self) -> ecs.ContainerDefinition:
         container = build_container(
             task=self.task,
+            # Should this be just the property name?
             name=self.props.name,
             container_image=self.props.container_image,
             cpu=2048,
@@ -225,15 +231,15 @@ class GameStack(Stack):
         """
         return ecs.Ec2TaskDefinition(
             self,
-            f"{self.props.name}-td",
+            self.qualify_name("-td"),
             volumes=[self.efs_volume],
             network_mode=ecs.NetworkMode.HOST,
         )
 
-    def _create_efs_backup(self, name: str, file_system: efs.FileSystem) -> backup.BackupPlan:
+    def _create_efs_backup(self, file_system: efs.FileSystem) -> backup.BackupPlan:
         plan = backup.BackupPlan(
             self,
-            f"{name}Backup",
+            self.qualify_name("Backup"),
             backup_plan_rules=[
                 backup.BackupPlanRule(
                     schedule_expression=events.Schedule.cron(
@@ -244,14 +250,16 @@ class GameStack(Stack):
             ],
         )
         plan.add_selection(
-            f"{name}Selection", resources=[backup.BackupResource.from_efs_file_system(file_system)]
+            self.qualify_name("Selection"),
+            resources=[backup.BackupResource.from_efs_file_system(file_system)],
         )
         return plan
 
-    def create_efs_volume(self, name: str) -> ecs.Volume:
+    def create_efs_volume(self) -> ecs.Volume:
         """
         Create an efs volume to mount on a container
         """
+        name = self.props.name
         file_system = build_efs_file_system(
             scope=self,
             name=name,
@@ -262,7 +270,7 @@ class GameStack(Stack):
         file_system.add_access_point(name, path="/")
 
         # setup backup for efs
-        self._create_efs_backup(name, file_system)
+        self._create_efs_backup(file_system)
 
         # define an ECS volume for this filesystem
         return build_ecs_efs_volume(file_system=file_system, name=name)
@@ -270,7 +278,7 @@ class GameStack(Stack):
     @cached_property
     def _ecs_task_rule(self) -> events.Rule:
         """Create a rule to listen for ECS Task State Changes"""
-        name = f"{self.props.name}EcsRunningTaskRule"
+        name = self.qualify_name("EcsRunningTaskRule")
         return events.Rule(
             self,
             name,
@@ -313,7 +321,7 @@ class GameStack(Stack):
     def create_dns_update_lambda(self) -> _lambda.Function:
         """Lambda that updates route 53 dns"""
 
-        name = f"{self.props.name}DnsUpdateLambda"
+        name = self.qualify_name("DnsUpdateLambda")
 
         function = build_lambda_function(
             scope=self,
@@ -347,7 +355,7 @@ class GameStack(Stack):
     @cached_property
     def ecs_update_lambda(self) -> _lambda.Function:
         """Lambda that updates cluster desired count"""
-        name = f"{self.props.name}ClusterUpdateLambda"
+        name = self.qualify_name("ClusterUpdateLambda")
         return build_lambda_function(
             scope=self,
             name=name,
@@ -370,7 +378,7 @@ class GameStack(Stack):
     @cached_property
     def asg_update_lambda(self) -> _lambda.Function:
         """Lambda that updates autoscaling group desired count"""
-        name = f"{self.props.name}AsgUpdateLambda"
+        name = self.qualify_name("AsgUpdateLambda")
         return build_lambda_function(
             scope=self,
             name=name,
@@ -392,7 +400,7 @@ class GameStack(Stack):
         }
 
         for action, schedule in rule_config.items():
-            name = f"{self.props.name}{action.capitalize()}Rule"
+            name = self.qualify_name(f"{action.capitalize()}Rule")
             events.Rule(
                 self,
                 name,
