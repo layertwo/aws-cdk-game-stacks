@@ -34,25 +34,6 @@ class GameStack(Stack):
         super().__init__(scope, f"{props.name.capitalize()}Stack", **kwargs)
         self.props = props
 
-        # setup VPC
-        self.vpc = ec2.Vpc(
-            self,
-            self.qualify_name("Vpc"),
-            subnet_configuration=[
-                ec2.SubnetConfiguration(
-                    name=self.qualify_name("Public"),
-                    subnet_type=ec2.SubnetType.PUBLIC,
-                    cidr_mask=24,
-                ),
-            ],
-            max_azs=99,
-        )
-        self.cluster = ecs.Cluster(self, self.qualify_name("Cluster"), vpc=self.vpc)
-        capacity_provider = ecs.AsgCapacityProvider(
-            self, "AsgCapacityProvider", auto_scaling_group=self.asg
-        )
-        self.cluster.add_asg_capacity_provider(capacity_provider)
-
         self.service = self.create_service()
 
         if self.props.auto_start:
@@ -67,6 +48,33 @@ class GameStack(Stack):
 
     def qualify_name(self, name: str) -> str:
         return f"{self.props.name}{name}"
+
+    @cached_property
+    def vpc(self) -> ec2.Vpc:
+        name = self.qualify_name("Vpc")
+        return ec2.Vpc(
+            self,
+            name,
+            vpc_name=name,
+            subnet_configuration=[
+                ec2.SubnetConfiguration(
+                    name=self.qualify_name("Public"),
+                    subnet_type=ec2.SubnetType.PUBLIC,
+                    cidr_mask=24,
+                ),
+            ],
+            max_azs=99,
+        )
+
+    @cached_property
+    def cluster(self) -> ecs.Cluster:
+        name = self.qualify_name("Cluster")
+        cluster = ecs.Cluster(self, name, cluster_name=name, vpc=self.vpc)
+        capacity_provider = ecs.AsgCapacityProvider(
+            self, "AsgCapacityProvider", auto_scaling_group=self.asg
+        )
+        cluster.add_asg_capacity_provider(capacity_provider)
+        return cluster
 
     @cached_property
     def asg(self) -> autoscaling.AutoScalingGroup:
@@ -140,9 +148,10 @@ class GameStack(Stack):
 
     @cached_property
     def instance_role(self) -> iam.Role:
-        name = self.qualify_name("InstanceRole")
         return iam.Role(
-            self, name, role_name=name, assumed_by=iam.ServicePrincipal("ec2.amazonaws.com")
+            self,
+            self.qualify_name("InstanceRole"),
+            assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
         )
 
     @cached_property
@@ -180,11 +189,11 @@ class GameStack(Stack):
     def create_service(self) -> ecs.Ec2Service:
         """Create a Ec2Service"""
         self._create_container()
+        name = self.qualify_name("Service")
         service = ecs.Ec2Service(
             self,
-            # TODO set cluster and resource name
-            # update to be PascalCase
-            self.qualify_name("-service"),
+            name,
+            service_name=name,
             cluster=self.cluster,
             task_definition=self.task,
             desired_count=1,

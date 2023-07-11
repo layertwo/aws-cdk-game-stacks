@@ -64,7 +64,7 @@ class MinecraftStack(GameStack):
     def minecraft_srv_record(self) -> route53.SrvRecord:
         record = route53.SrvRecord(
             self,
-            "MinecraftSrvRecord",
+            self.qualify_name("SrvRecord"),
             values=[route53.SrvRecordValue(host_name=self.fqdn, port=25565, priority=0, weight=0)],
             zone=self.hosted_zone,
             record_name=f"_minecraft._tcp.{self.fqdn}",
