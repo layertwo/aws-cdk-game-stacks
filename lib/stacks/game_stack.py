@@ -16,8 +16,7 @@ from constructs import Construct
 
 from lib.aws_common._lambda import build_lambda_function
 from lib.aws_common.ec2 import create_security_group
-from lib.aws_common.ecs import build_container, build_ecs_efs_volume
-from lib.aws_common.efs import build_efs_file_system
+from lib.aws_common.ecs import build_container
 from lib.aws_common.iam import (
     asg_update_policy,
     ec2_instances_read,
@@ -134,10 +133,13 @@ class GameStack(Stack):
         )
 
     @cached_property
-    def game_efs_security_group(self) -> ec2.SecurityGroup:
+    def efs_security_group(self) -> ec2.SecurityGroup:
         """Create game security group with ports from GameProperties"""
         sg = create_security_group(
-            scope=self, vpc=self.vpc, name=self.qualify_name("Efs"), allow_all_outbound=True
+            scope=self,
+            vpc=self.vpc,
+            name=self.qualify_name("EfsSecurityGroup"),
+            allow_all_outbound=True,
         )
 
         sg.add_ingress_rule(
@@ -201,10 +203,6 @@ class GameStack(Stack):
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
 
-    @cached_property
-    def efs_volume(self) -> ecs.Volume:
-        return self.create_efs_volume()
-
     def _create_container(self) -> ecs.ContainerDefinition:
         container = build_container(
             task=self.task,
@@ -228,7 +226,7 @@ class GameStack(Stack):
         container.add_mount_points(
             ecs.MountPoint(
                 container_path=self.props.container_path,
-                source_volume=self.efs_volume.name,
+                source_volume=self.ecs_volume.name,
                 read_only=False,
             )
         )
@@ -241,11 +239,28 @@ class GameStack(Stack):
         return ecs.Ec2TaskDefinition(
             self,
             self.qualify_name("-td"),
-            volumes=[self.efs_volume],
+            volumes=[self.ecs_volume],
             network_mode=ecs.NetworkMode.HOST,
         )
 
-    def _create_efs_backup(self, file_system: efs.FileSystem) -> backup.BackupPlan:
+    @cached_property
+    def file_system(self) -> efs.FileSystem:
+        name = self.qualify_name("-fs")
+        file_system = efs.FileSystem(
+            self,
+            name,
+            file_system_name=name,
+            vpc=self.vpc,
+            lifecycle_policy=efs.LifecyclePolicy.AFTER_14_DAYS,
+            out_of_infrequent_access_policy=efs.OutOfInfrequentAccessPolicy.AFTER_1_ACCESS,
+            performance_mode=efs.PerformanceMode.GENERAL_PURPOSE,
+            throughput_mode=efs.ThroughputMode.ELASTIC,
+            security_group=self.efs_security_group,
+        )
+        file_system.add_access_point(name, path="/")
+
+        # backup plan for efs
+        # TODO add backup flag to config props
         plan = backup.BackupPlan(
             self,
             self.qualify_name("Backup"),
@@ -262,27 +277,22 @@ class GameStack(Stack):
             self.qualify_name("Selection"),
             resources=[backup.BackupResource.from_efs_file_system(file_system)],
         )
-        return plan
 
-    def create_efs_volume(self) -> ecs.Volume:
+        return file_system
+
+    @cached_property
+    def ecs_volume(self) -> ecs.Volume:
         """
         Create an efs volume to mount on a container
         """
-        name = self.props.name
-        file_system = build_efs_file_system(
-            scope=self,
-            name=name,
-            vpc=self.vpc,
-            throughput_mode=efs.ThroughputMode.ELASTIC,
-            security_group=self.game_efs_security_group,
+        return ecs.Volume(
+            name=self.qualify_name("-volume"),
+            efs_volume_configuration=ecs.EfsVolumeConfiguration(
+                file_system_id=self.file_system.file_system_id,
+                root_directory="/",
+                transit_encryption="ENABLED",
+            ),
         )
-        file_system.add_access_point(name, path="/")
-
-        # setup backup for efs
-        self._create_efs_backup(file_system)
-
-        # define an ECS volume for this filesystem
-        return build_ecs_efs_volume(file_system=file_system, name=name)
 
     @cached_property
     def _ecs_task_rule(self) -> events.Rule:
@@ -396,7 +406,7 @@ class GameStack(Stack):
             initial_policy=[
                 asg_update_policy(resources=[self.asg.auto_scaling_group_arn]),
             ],
-            # TODO should this ARN instead?
+            # TODO should this be ARN instead?
             environment={"AUTOSCALING_GROUP_NAME": self.asg.auto_scaling_group_name},
         )
 

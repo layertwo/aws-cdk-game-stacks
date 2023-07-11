@@ -56,7 +56,7 @@ class MinecraftStack(GameStack):
         container.add_mount_points(
             ecs.MountPoint(
                 container_path=self.props.container_path,
-                source_volume=self.efs_volume.name,
+                source_volume=self.ecs_volume.name,
                 read_only=False,
             )
         )

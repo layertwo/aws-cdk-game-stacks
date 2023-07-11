@@ -9,8 +9,9 @@ def create_security_group(
 ) -> ec2.SecurityGroup:
     return ec2.SecurityGroup(
         scope,
-        f"{name}SecurityGroup",
+        name,
+        security_group_name=name,
         vpc=vpc,
-        description=f"{name.capitalize()} security group",
+        description=f"{name} security group",
         **kwargs,
     )
