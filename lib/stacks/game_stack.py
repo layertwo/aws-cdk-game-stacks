@@ -238,7 +238,7 @@ class GameStack(Stack):
         """
         return ecs.Ec2TaskDefinition(
             self,
-            self.qualify_name("-td"),
+            self.qualify_name("TaskDef"),
             volumes=[self.ecs_volume],
             network_mode=ecs.NetworkMode.HOST,
         )
