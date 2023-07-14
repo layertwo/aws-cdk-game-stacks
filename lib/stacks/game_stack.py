@@ -245,7 +245,7 @@ class GameStack(Stack):
 
     @cached_property
     def file_system(self) -> efs.FileSystem:
-        name = self.qualify_name("-fs")
+        name = self.qualify_name("Efs")
         file_system = efs.FileSystem(
             self,
             name,
@@ -286,7 +286,7 @@ class GameStack(Stack):
         Create an efs volume to mount on a container
         """
         return ecs.Volume(
-            name=self.qualify_name("-volume"),
+            name=self.qualify_name("Volume"),
             efs_volume_configuration=ecs.EfsVolumeConfiguration(
                 file_system_id=self.file_system.file_system_id,
                 root_directory="/",
