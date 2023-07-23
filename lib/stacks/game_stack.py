@@ -162,6 +162,9 @@ class GameStack(Stack):
         sg = create_security_group(
             scope=self, vpc=self.vpc, name=self.qualify_name("Game"), allow_all_outbound=True
         )
+        sg.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.icmp_ping(), f"{self.props.name} ICMP from anywhere"
+        )
         for port in self.props.tcp_ports:
             sg.add_ingress_rule(
                 ec2.Peer.any_ipv4(),
@@ -199,6 +202,7 @@ class GameStack(Stack):
             cluster=self.cluster,
             task_definition=self.task,
             desired_count=1,
+            min_healthy_percent=0,
         )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
