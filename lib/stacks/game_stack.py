@@ -70,7 +70,10 @@ class GameStack(Stack):
         name = self.qualify_name("Cluster")
         cluster = ecs.Cluster(self, name, cluster_name=name, vpc=self.vpc)
         capacity_provider = ecs.AsgCapacityProvider(
-            self, "AsgCapacityProvider", auto_scaling_group=self.asg
+            self,
+            "AsgCapacityProvider",
+            auto_scaling_group=self.asg,
+            enable_managed_termination_protection=not self.props.auto_start,
         )
         cluster.add_asg_capacity_provider(capacity_provider)
         return cluster
