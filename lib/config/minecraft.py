@@ -15,6 +15,7 @@ MODS = [
     "https://mediafilez.forgecdn.net/files/4586/220/worldedit-bukkit-7.2.15.jar",
     # Multiverse
     "https://github.com/Multiverse/Multiverse-Core/releases/download/4.3.9/multiverse-core-4.3.9.jar",
+    "https://github.com/Multiverse/Multiverse-Inventories/releases/download/4.2.5/multiverse-inventories-4.2.5.jar",
     # Permissions
     "https://download.luckperms.net/1512/bukkit/loader/LuckPerms-Bukkit-5.4.98.jar",
     # World viewing
