@@ -18,6 +18,7 @@ MODS = [
     "https://github.com/Multiverse/Multiverse-Inventories/releases/download/4.2.5/multiverse-inventories-4.2.5.jar",
     # Permissions
     "https://download.luckperms.net/1512/bukkit/loader/LuckPerms-Bukkit-5.4.98.jar",
+    "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
     # World viewing
     "https://mediafilez.forgecdn.net/files/4632/182/Dynmap-3.6-spigot.jar",
     # Monitoring - AWS
