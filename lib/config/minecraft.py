@@ -3,7 +3,7 @@ from lib.config import GameProperties
 EMAIL = "aws+minecraft@layertwo.dev"
 
 ESSENTIALS_VER = "2.20.0"
-VOXEL_SNIPER_VER = "8.12.0"
+VOXEL_SNIPER_VER = "8.12.2"
 
 MODS = [
     # Essentials
