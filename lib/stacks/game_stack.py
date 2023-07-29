@@ -258,7 +258,7 @@ class GameStack(Stack):
             name,
             file_system_name=name,
             vpc=self.vpc,
-            lifecycle_policy=efs.LifecyclePolicy.AFTER_14_DAYS,
+            lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
             out_of_infrequent_access_policy=efs.OutOfInfrequentAccessPolicy.AFTER_1_ACCESS,
             performance_mode=efs.PerformanceMode.GENERAL_PURPOSE,
             throughput_mode=efs.ThroughputMode.ELASTIC,
