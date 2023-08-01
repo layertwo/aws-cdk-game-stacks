@@ -10,9 +10,12 @@ MODS = [
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsX-{ESSENTIALS_VER}.jar",
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXChat-{ESSENTIALS_VER}.jar",
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXSpawn-{ESSENTIALS_VER}.jar",
-    # Terraforming
+    # World Management
     f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/v{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
     "https://mediafilez.forgecdn.net/files/4586/220/worldedit-bukkit-7.2.15.jar",
+    "https://mediafilez.forgecdn.net/files/4554/903/worldguard-bukkit-7.0.8-dist.jar",
+    "https://github.com/layertwo/WeatherMan/releases/download/2.0.0/WeatherMan-2.0.0.jar",
+    "https://github.com/layertwo/SpigotPing/releases/download/2.7.0/SpigotPing-2.7.0.jar",
     # Multiverse
     "https://github.com/Multiverse/Multiverse-Core/releases/download/4.3.9/multiverse-core-4.3.9.jar",
     "https://github.com/Multiverse/Multiverse-Inventories/releases/download/4.2.5/multiverse-inventories-4.2.5.jar",
