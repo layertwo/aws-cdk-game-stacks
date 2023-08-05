@@ -13,7 +13,7 @@ MODS = [
     # World Management
     f"https://github.com/KevinDaGame/VoxelSniper-Reimagined/releases/download/v{VOXEL_SNIPER_VER}/voxelsniper-{VOXEL_SNIPER_VER}-spigot.jar",
     "https://mediafilez.forgecdn.net/files/4586/220/worldedit-bukkit-7.2.15.jar",
-    "https://mediafilez.forgecdn.net/files/4554/903/worldguard-bukkit-7.0.8-dist.jar",
+    "https://mediafilez.forgecdn.net/files/4675/318/worldguard-bukkit-7.0.9-dist.jar",
     "https://github.com/layertwo/WeatherMan/releases/download/2.0.0/WeatherMan-2.0.0.jar",
     "https://github.com/layertwo/SpigotPing/releases/download/2.7.0/SpigotPing-2.7.0.jar",
     # Multiverse
