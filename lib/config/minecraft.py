@@ -22,6 +22,9 @@ MODS = [
     # Permissions
     "https://download.luckperms.net/1512/bukkit/loader/LuckPerms-Bukkit-5.4.98.jar",
     "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
+    # Transportation
+    "https://ci.mg-dev.eu/job/TrainCarts/1412/artifact/target/TrainCarts-1.20.1-v1-1412.jar",
+    "https://ci.mg-dev.eu/job/BKCommonLib/1586/artifact/build/BKCommonLib-1.20.1-v1-1586.jar",
     # World viewing
     "https://mediafilez.forgecdn.net/files/4632/182/Dynmap-3.6-spigot.jar",
     # Monitoring - AWS
