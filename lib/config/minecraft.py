@@ -52,6 +52,7 @@ MINECRAFT_PROPS = GameProperties(
         "MAX_PLAYERS": "10",
         "SNOOPER_ENABLED": "FALSE",
         "ENABLE_ROLLING_LOGS": "TRUE",
+        "USE_AIKAR_FLAGS": "TRUE",
     },
     auto_start=True,
     start_time="0 23 * * FRI",  # Friday 3PM PST
