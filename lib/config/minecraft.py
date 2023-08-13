@@ -37,7 +37,7 @@ MINECRAFT_PROPS = GameProperties(
     container_path="/data",
     tcp_ports=[25565],
     environment={
-        "TYPE": "PAPER",
+        "TYPE": "PURPUR",
         "EULA": "TRUE",
         "VERSION": "1.20.1",
         "MAX_MEMORY": "6144M",
