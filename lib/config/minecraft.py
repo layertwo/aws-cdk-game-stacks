@@ -53,6 +53,7 @@ MINECRAFT_PROPS = GameProperties(
         "SNOOPER_ENABLED": "FALSE",
         "ENABLE_ROLLING_LOGS": "TRUE",
         "USE_AIKAR_FLAGS": "TRUE",
+        "USE_FLARE_FLAGS": "FALSE",
     },
     auto_start=True,
     start_time="0 23 * * FRI",  # Friday 3PM PST
