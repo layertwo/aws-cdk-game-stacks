@@ -3,7 +3,7 @@ from lib.config import GameProperties
 EMAIL = "aws+minecraft@layertwo.dev"
 
 ESSENTIALS_VER = "2.20.1"
-VOXEL_SNIPER_VER = "8.12.2"
+VOXEL_SNIPER_VER = "8.12.3"
 
 MODS = [
     # Essentials
@@ -17,13 +17,13 @@ MODS = [
     "https://github.com/layertwo/WeatherMan/releases/download/2.0.0/WeatherMan-2.0.0.jar",
     "https://github.com/layertwo/SpigotPing/releases/download/2.7.0/SpigotPing-2.7.0.jar",
     # Multiverse
-    "https://github.com/Multiverse/Multiverse-Core/releases/download/4.3.9/multiverse-core-4.3.9.jar",
-    "https://github.com/Multiverse/Multiverse-Inventories/releases/download/4.2.5/multiverse-inventories-4.2.5.jar",
+    "https://github.com/Multiverse/Multiverse-Core/releases/download/4.3.11/multiverse-core-4.3.11.jar",
+    "https://github.com/Multiverse/Multiverse-Inventories/releases/download/4.2.6/multiverse-inventories-4.2.6.jar",
     # Permissions
-    "https://download.luckperms.net/1512/bukkit/loader/LuckPerms-Bukkit-5.4.98.jar",
+    "https://download.luckperms.net/1515/bukkit/loader/LuckPerms-Bukkit-5.4.102.jar",
     "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
     # Transportation
-    "https://ci.mg-dev.eu/job/TrainCarts/1412/artifact/target/TrainCarts-1.20.1-v1-1412.jar",
+    "https://ci.mg-dev.eu/job/TrainCarts/1418/artifact/target/TrainCarts-1.20.1-v2-1418.jar",
     "https://ci.mg-dev.eu/job/BKCommonLib/1586/artifact/build/BKCommonLib-1.20.1-v1-1586.jar",
     # World viewing
     "https://mediafilez.forgecdn.net/files/4632/182/Dynmap-3.6-spigot.jar",
