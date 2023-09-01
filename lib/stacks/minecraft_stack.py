@@ -36,7 +36,7 @@ class MinecraftStack(GameStack):
             docker_labels={
                 "traefik.enable": "true",
                 f"traefik.http.routers.dynmap-https.rule": f"Host(`{self.fqdn}`)",
-                "traefik.http.services.dynmap-https.loadbalancer.server.port": "8123",
+                "traefik.http.services.dynmap-https.loadbalancer.server.port": "8080",
                 "traefik.http.routers.dynmap-https.entrypoints": "websecure",
                 "traefik.http.routers.dynmap-https.service": "dynmap-https",
                 "traefik.http.routers.dynmap-https.tls": "true",
@@ -77,7 +77,7 @@ class MinecraftStack(GameStack):
         container = build_container(
             task=self.task,
             name="Traefik",
-            container_image="traefik:v2.8",
+            container_image="traefik:v2.10",
             cpu=128,
             memory_limit_mib=128,
             command=[
