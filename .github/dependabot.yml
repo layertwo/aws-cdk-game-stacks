@@ -9,6 +9,9 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    ignore:
+    - dependency-name: boto3
+    - dependency-name: aws-cdk-lib
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
