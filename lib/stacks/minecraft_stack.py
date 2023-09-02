@@ -19,7 +19,7 @@ class MinecraftStack(GameStack):
         """Minecraft Stack"""
         super().__init__(scope, props, **kwargs)
         self.minecraft_srv_record()
-        self.traefik_container()
+        self.create_traefik_service()
         self.add_metric_to_task_role()
 
     def _create_container(self) -> ecs.ContainerDefinition:
@@ -72,10 +72,41 @@ class MinecraftStack(GameStack):
         )
         return record
 
-    def traefik_container(self):
+    @cached_property
+    def traefik_task(self) -> ecs.Ec2TaskDefinition:
+        """
+        Create an ECS task for the specified
+        """
+        task = ecs.Ec2TaskDefinition(
+            self,
+            "TraefikTaskDef",
+            volumes=[self.ecs_volume],
+            network_mode=ecs.NetworkMode.HOST,
+        )
+        task.add_to_task_role_policy(ec2_instances_read(resources=["*"]))
+        task.add_to_task_role_policy(ecs_cluster_read_policy(resources=["*"]))
+        return task
+
+    def create_traefik_service(self) -> ecs.Ec2Service:
+        """Create a Ec2Service from Traefik"""
+        name = "TraefikService"
+        self.build_traefik_container()
+        service = ecs.Ec2Service(
+            self,
+            name,
+            service_name=name,
+            cluster=self.cluster,
+            task_definition=self.traefik_task,
+            desired_count=1,
+            min_healthy_percent=0,
+        )
+        service.auto_scale_task_count(max_capacity=1, min_capacity=1)
+        return service
+
+    def build_traefik_container(self):
         """Use a container for reverse proxy to Minecraft plugins"""
         container = build_container(
-            task=self.task,
+            task=self.traefik_task,
             name="Traefik",
             container_image="traefik:v2.10",
             cpu=128,
@@ -105,8 +136,7 @@ class MinecraftStack(GameStack):
                 f"Traefik port tcp/{port} from anywhere",
             )
 
-        self.task.add_to_task_role_policy(ec2_instances_read(resources=["*"]))
-        self.task.add_to_task_role_policy(ecs_cluster_read_policy(resources=["*"]))
+        return container
 
     def add_metric_to_task_role(self) -> None:
         # allow task to publish cloudwatch metrics

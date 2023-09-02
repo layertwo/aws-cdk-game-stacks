@@ -33,7 +33,7 @@ class GameStack(Stack):
         super().__init__(scope, f"{props.name.capitalize()}Stack", **kwargs)
         self.props = props
 
-        self.service = self.create_service()
+        self.service = self.create_game_service()
 
         if self.props.auto_start:
             self._create_asg_scheduled_actions()
@@ -194,7 +194,7 @@ class GameStack(Stack):
                 )
         return sg
 
-    def create_service(self) -> ecs.Ec2Service:
+    def create_game_service(self) -> ecs.Ec2Service:
         """Create a Ec2Service"""
         self._create_container()
         name = self.qualify_name("Service")
