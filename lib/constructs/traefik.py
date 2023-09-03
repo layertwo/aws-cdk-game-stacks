@@ -1,11 +1,9 @@
 from functools import cached_property
 
-from aws_cdk import Aws, Duration
+from aws_cdk import Aws
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
-from aws_cdk import aws_iam as iam
-from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
 from lib.aws_common.ecs import build_container

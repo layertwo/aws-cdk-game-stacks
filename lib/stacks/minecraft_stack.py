@@ -1,5 +1,3 @@
-from functools import cached_property
-
 from aws_cdk import Duration
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_iam as iam
@@ -33,7 +31,7 @@ class MinecraftStack(GameStack):
             environment=self.props.environment,
             docker_labels={
                 "traefik.enable": "true",
-                f"traefik.http.routers.dynmap-https.rule": f"Host(`{self.fqdn}`)",
+                "traefik.http.routers.dynmap-https.rule": f"Host(`{self.fqdn}`)",
                 "traefik.http.services.dynmap-https.loadbalancer.server.port": "8080",
                 "traefik.http.routers.dynmap-https.entrypoints": "websecure",
                 "traefik.http.routers.dynmap-https.service": "dynmap-https",
