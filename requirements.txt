@@ -1,9 +1,9 @@
 # aws
-aws-cdk-lib==2.93.0
+aws-cdk-lib==2.96.2
 constructs==10.2.70
-boto3==1.28.35
+boto3==1.28.54
 awsipranges==0.3.3
 
 # linting
-black==23.7.0
+black==23.9.1
 isort==5.12.0
