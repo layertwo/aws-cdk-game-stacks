@@ -5,5 +5,5 @@ boto3==1.28.35
 awsipranges==0.3.3
 
 # linting
-black==23.7.0
+black==23.9.1
 isort==5.12.0
