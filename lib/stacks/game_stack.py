@@ -113,18 +113,18 @@ class GameStack(Stack):
     @property
     def _launch_template(self) -> ec2.LaunchTemplate:
         instance_type = ec2.InstanceType(self.props.instance_type)
-        image_reference = "/aws/service/ecs/optimized-ami/amazon-linux-2023/"
-        if instance_type.architecture == ec2.InstanceArchitecture.ARM_64:
-            image_reference += "arm64"
+        hardware_type = (
+            ecs.AmiHardwareType.ARM
+            if instance_type.architecture == ec2.InstanceArchitecture.ARM_64
+            else ecs.AmiHardwareType.STANDARD
+        )
         name = self.qualify_name("LaunchTemplate")
         return ec2.LaunchTemplate(
             self,
             name,
             launch_template_name=name,
             instance_type=instance_type,
-            machine_image=ec2.MachineImage.from_ssm_parameter(
-                f"{image_reference}/recommended/image_id"
-            ),
+            machine_image=ecs.EcsOptimizedImage.amazon_linux2023(hardware_type),
             security_group=self.instance_security_group,
             spot_options=ec2.LaunchTemplateSpotOptions(
                 max_price=0.05, interruption_behavior=ec2.SpotInstanceInterruption.TERMINATE
