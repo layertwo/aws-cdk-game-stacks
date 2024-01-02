@@ -323,8 +323,8 @@ class GameStack(Stack):
     @cached_property
     def hosted_zone(self):
         """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_lookup(
-            self, "HostedZone", domain_name=self.props.domain_name
+        return route53.HostedZone.from_hosted_zone_id(
+            self, "HostedZone", hosted_zone_id=self.props.hosted_zone_id
         )
 
     @cached_property

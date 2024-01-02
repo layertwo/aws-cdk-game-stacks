@@ -12,6 +12,7 @@ class GameProperties:
     udp_ports: List[int] = field(default_factory=list)
     environment: Optional[Dict[str, Any]] = None
     domain_name: Optional[str] = None
+    hosted_zone_id: Optional[str] = None
     hostname: Optional[str] = None
     auto_start: bool = False
     start_time: Optional[str] = None

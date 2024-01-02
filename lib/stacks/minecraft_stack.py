@@ -14,7 +14,6 @@ class MinecraftStack(GameStack):
     def __init__(self, scope: Construct, props: GameProperties, **kwargs) -> None:
         """Minecraft Stack"""
         super().__init__(scope, props, **kwargs)
-        self.minecraft_srv_record()
         self.create_traefik_service()
         self.add_metric_to_task_role()
 
@@ -56,17 +55,6 @@ class MinecraftStack(GameStack):
                 read_only=False,
             )
         )
-
-    def minecraft_srv_record(self) -> route53.SrvRecord:
-        record = route53.SrvRecord(
-            self,
-            self.qualify_name("SrvRecord"),
-            values=[route53.SrvRecordValue(host_name=self.fqdn, port=25565, priority=0, weight=0)],
-            zone=self.hosted_zone,
-            record_name=f"_minecraft._tcp.{self.fqdn}",
-            ttl=Duration.seconds(60),
-        )
-        return record
 
     def add_metric_to_task_role(self) -> None:
         # allow task to publish cloudwatch metrics
