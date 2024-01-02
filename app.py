@@ -4,7 +4,6 @@ import os
 from aws_cdk import App, Environment
 
 from lib.config.minecraft import MINECRAFT_PROPS
-from lib.stacks.game_stack import GameStack
 from lib.stacks.minecraft_stack import MinecraftStack
 
 app = App()
