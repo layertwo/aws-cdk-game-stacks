@@ -25,3 +25,9 @@ jobs:
         poetry run black lib lambda --check
         poetry run isort lib lambda --check
         poetry run flake8
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: CDK Synthesize
+      run: cdk synth --app="python3 app.py"
