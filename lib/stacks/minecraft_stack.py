@@ -1,7 +1,5 @@
-from aws_cdk import Duration
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_iam as iam
-from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
 from lib.aws_common.ecs import build_container

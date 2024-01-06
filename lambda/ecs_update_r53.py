@@ -55,7 +55,6 @@ def handler(event, context) -> None:
         logger.error(f"unable to set IP for {fqdn}. No interfaces found.")
 
 
-### EC2
 def get_interfaces_from_instance_id(session: Session, instance_id: str) -> Dict[str, Any]:
     """Get interfaces from Instance ID"""
     client = session.client("ec2")
@@ -78,7 +77,6 @@ def get_public_ip_from_interfaces(interfaces: JsonListDict) -> str:
         return n["Association"]["PublicIp"]
 
 
-### ECS
 def get_instance_id_from_container(session: Session, cluster: str, container_instance: str) -> str:
     """Get Instance ID from container instance"""
     client = session.client("ecs")
@@ -98,7 +96,6 @@ def get_eni_id(attachments: List) -> str:
     return ""
 
 
-### Route53
 def get_hosted_zone_domain(session: Session, hosted_zone: str) -> str:
     """Get hosted zone name"""
     client = session.client("route53")
