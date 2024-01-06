@@ -1,4 +1,4 @@
-from lib.config import GameProperties
+from lib.config import GamePort, GameProperties, PortType
 
 EMAIL = "aws+minecraft@layertwo.dev"
 
@@ -38,7 +38,7 @@ MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
     container_image="itzg/minecraft-server:java17-jdk",
     container_path="/data",
-    tcp_ports=[25565],
+    ports=[GamePort(port_type=PortType.TCP, number=25565)],
     environment={
         "TYPE": "PAPER",
         "EULA": "TRUE",
