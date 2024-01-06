@@ -5,7 +5,7 @@ from constructs import Construct
 from lib.aws_common.ecs import build_container
 from lib.config import GameProperties
 from lib.constructs.traefik import TraefikService
-from lib.stacks.game_stack import GameStack
+from lib.stacks.game_stack import GameStack, PortType
 
 
 class MinecraftStack(GameStack):
@@ -36,14 +36,13 @@ class MinecraftStack(GameStack):
                 "traefik.http.routers.dynmap-https.tls.certresolver": "le",
             },
         )
-        for port in self.props.tcp_ports:
+        for port in self.props.ports:
+            if port.port_type == PortType.TCP:
+                proto = ecs.Protocol.TCP
+            elif port.port_type == PortType.UDP:
+                proto = ecs.Protocol.UDP
             container.add_port_mappings(
-                ecs.PortMapping(container_port=port, host_port=port, protocol=ecs.Protocol.TCP)
-            )
-
-        for port in self.props.udp_ports:
-            container.add_port_mappings(
-                ecs.PortMapping(container_port=port, host_port=port, protocol=ecs.Protocol.UDP)
+                ecs.PortMapping(container_port=port.number, host_port=port.number, protocol=proto)
             )
 
         container.add_mount_points(

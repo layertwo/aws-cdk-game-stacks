@@ -17,14 +17,8 @@ from constructs import Construct
 from lib.aws_common._lambda import build_lambda_function
 from lib.aws_common.ec2 import create_security_group
 from lib.aws_common.ecs import build_container
-from lib.aws_common.iam import (
-    asg_update_policy,
-    ec2_instances_read,
-    ecs_cluster_read_policy,
-    ecs_cluster_update_policy,
-    r53_update_policy,
-)
-from lib.config import GameProperties
+from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy, r53_update_policy
+from lib.config import GameProperties, PortType
 
 
 class GameStack(Stack):
@@ -37,7 +31,6 @@ class GameStack(Stack):
 
         if self.props.auto_start:
             self._create_asg_scheduled_actions()
-            # self.create_lambda_start_stop_rule()
 
         if self.props.domain_name:
             self.create_dns_update_lambda()
@@ -168,18 +161,15 @@ class GameStack(Stack):
         sg.add_ingress_rule(
             ec2.Peer.any_ipv4(), ec2.Port.icmp_ping(), f"{self.props.name} ICMP from anywhere"
         )
-        for port in self.props.tcp_ports:
+        for port in self.props.ports:
+            if port.port_type == PortType.TCP:
+                ec2_port = ec2.Port.tcp(port.number)
+            elif port.port_type == PortType.UDP:
+                ec2_port = ec2.Port.udp(port.number)
             sg.add_ingress_rule(
                 ec2.Peer.any_ipv4(),
-                ec2.Port.tcp(port),
-                f"{self.props.name} port tcp/{port} from anywhere",
-            )
-
-        for port in self.props.udp_ports:
-            sg.add_ingress_rule(
-                ec2.Peer.any_ipv4(),
-                ec2.Port.udp(port),
-                f"{self.props.name} port udp/{port} from anywhere",
+                ec2_port,
+                f"{self.props.name} port {port.port_type.value}/{port} from anywhere",
             )
 
         # Allow EC2 Instance Connect
@@ -220,14 +210,13 @@ class GameStack(Stack):
             memory_limit_mib=6144,
             environment=self.props.environment,
         )
-        for port in self.props.tcp_ports:
+        for port in self.props.ports:
+            if port.port_type == PortType.TCP:
+                proto = ecs.Protocol.TCP
+            elif port.port_type == PortType.UDP:
+                proto = ecs.Protocol.UDP
             container.add_port_mappings(
-                ecs.PortMapping(container_port=port, host_port=port, protocol=ecs.Protocol.TCP)
-            )
-
-        for port in self.props.udp_ports:
-            container.add_port_mappings(
-                ecs.PortMapping(container_port=port, host_port=port, protocol=ecs.Protocol.UDP)
+                ecs.PortMapping(container_port=port.number, host_port=port.number, protocol=proto)
             )
 
         container.add_mount_points(
@@ -377,70 +366,3 @@ class GameStack(Stack):
             ),
         )
         return function
-
-    @cached_property
-    def ecs_update_lambda(self) -> _lambda.Function:
-        """Lambda that updates cluster desired count"""
-        name = self.qualify_name("ClusterUpdateLambda")
-        return build_lambda_function(
-            scope=self,
-            name=name,
-            function_name=name,
-            handler="ecs_desired_task_count.handler",
-            initial_policy=[
-                ecs_cluster_read_policy(
-                    resources=[self.cluster.cluster_arn, self.service.service_arn]
-                ),
-                ecs_cluster_update_policy(
-                    resources=[self.cluster.cluster_arn, self.service.service_arn]
-                ),
-            ],
-            environment={
-                "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
-                "ECS_SERVICE_NAME": self.service.service_name,
-            },
-        )
-
-    @cached_property
-    def asg_update_lambda(self) -> _lambda.Function:
-        """Lambda that updates autoscaling group desired count"""
-        name = self.qualify_name("AsgUpdateLambda")
-        return build_lambda_function(
-            scope=self,
-            name=name,
-            function_name=name,
-            handler="asg_set_desired_capacity.handler",
-            initial_policy=[
-                asg_update_policy(resources=[self.asg.auto_scaling_group_arn]),
-            ],
-            # TODO should this be ARN instead?
-            environment={"AUTOSCALING_GROUP_NAME": self.asg.auto_scaling_group_name},
-        )
-
-    def create_lambda_start_stop_rule(self) -> None:
-        """Lambda that updates cluster desired count"""
-
-        rule_config = {
-            "start": self.props.start_time,
-            "stop": self.props.stop_time,
-        }
-
-        for action, schedule in rule_config.items():
-            name = self.qualify_name(f"{action.capitalize()}Rule")
-            events.Rule(
-                self,
-                name,
-                rule_name=name,
-                schedule=events.Schedule.expression(schedule),
-                enabled=self.props.auto_start,
-                targets=[
-                    targets.LambdaFunction(
-                        handler=self.ecs_update_lambda,
-                        event=events.RuleTargetInput.from_object({"action": action}),
-                    ),
-                    targets.LambdaFunction(
-                        handler=self.asg_update_lambda,
-                        event=events.RuleTargetInput.from_object({"action": action}),
-                    ),
-                ],
-            )
