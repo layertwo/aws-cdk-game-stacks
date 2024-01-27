@@ -169,7 +169,7 @@ class GameStack(Stack):
             sg.add_ingress_rule(
                 ec2.Peer.any_ipv4(),
                 ec2_port,
-                f"{self.props.name} port {port.port_type.value}/{port} from anywhere",
+                f"{self.props.name} port {port.port_type.value}/{port.number} from anywhere",
             )
 
         # Allow EC2 Instance Connect
