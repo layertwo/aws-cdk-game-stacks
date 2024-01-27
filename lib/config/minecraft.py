@@ -34,6 +34,7 @@ MODS = [
     "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.2.0/CloudWatch-1.2.0.jar",
 ]
 
+MAX_MEMORY = 3072
 MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
     container_image="itzg/minecraft-server:java17-jdk",
@@ -43,7 +44,7 @@ MINECRAFT_PROPS = GameProperties(
         "TYPE": "PAPER",
         "EULA": "TRUE",
         "VERSION": "1.20.1",
-        "MAX_MEMORY": "6144M",
+        "MAX_MEMORY": f"{MAX_MEMORY}M",
         "MAX_TICK_TIME": "60000",
         "MODS": ",".join(MODS),
         "REMOVE_OLD_MODS": "TRUE",
@@ -63,6 +64,7 @@ MINECRAFT_PROPS = GameProperties(
     stop_time="0 6 * * MON",  # Sunday 10PM PST,
     domain_name="g.layertwo.dev",
     hosted_zone_id="Z09871391DBKPQ6VVS5KY",
-    instance_type="t4g.large",
+    instance_type="t4g.medium",
     instance_connect=True,
+    max_mib_memory=MAX_MEMORY,
 )

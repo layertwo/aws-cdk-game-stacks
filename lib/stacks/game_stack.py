@@ -207,7 +207,7 @@ class GameStack(Stack):
             name=self.props.name,
             container_image=self.props.container_image,
             cpu=2048,
-            memory_limit_mib=6144,
+            memory_limit_mib=self.props.max_mib_memory,
             environment=self.props.environment,
         )
         for port in self.props.ports:

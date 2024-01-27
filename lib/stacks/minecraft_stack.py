@@ -24,7 +24,7 @@ class MinecraftStack(GameStack):
             name=self.props.name,
             container_image=self.props.container_image,
             cpu=1920,
-            memory_limit_mib=6144,
+            memory_limit_mib=self.props.max_mib_memory,
             environment=self.props.environment,
             docker_labels={
                 "traefik.enable": "true",

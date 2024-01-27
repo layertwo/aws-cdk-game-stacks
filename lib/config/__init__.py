@@ -30,3 +30,4 @@ class GameProperties:
     enabled: bool = True
     instance_type: str = "t3a.large"
     instance_connect: bool = False
+    max_mib_memory: int = 3072
