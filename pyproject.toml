@@ -24,7 +24,7 @@ isort = "^5.13.0"
 black = "^24.4.2"
 flake8 = "^7.1.0"
 flake8-pyproject = "^1.2.3"
-pytest = "^8.2.2"
+pytest = "^8.3.2"
 pytest-cov = "^5.0.0"
 
 [build-system]
