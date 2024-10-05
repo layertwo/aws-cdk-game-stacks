@@ -1,4 +1,5 @@
 from functools import cached_property
+from ipaddress import IPv4Network, IPv6Network
 
 import awsipranges
 from aws_cdk import Duration, Stack, Tags
@@ -11,7 +12,6 @@ from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
-from aws_cdk import aws_route53 as route53
 from constructs import Construct
 
 from lib.aws_common._lambda import build_lambda_function
@@ -176,9 +176,15 @@ class GameStack(Stack):
         if self.props.instance_connect:
             ranges = awsipranges.get_ranges()
             for prefix in ranges.filter(regions=self.region, services="EC2_INSTANCE_CONNECT"):
-                ip_range = str(prefix.ip_prefix)
+                ip_range = None
+                if isinstance(prefix, IPv4Network):
+                    ip_range = (ec2.Peer.ipv4(prefix),)
+                elif isinstance(prefix, IPv6Network):
+                    ip_range = ec2.Peer.ipv6(prefix)
+                else:
+                    continue
                 sg.add_ingress_rule(
-                    ec2.Peer.ipv4(ip_range),
+                    ip_range,
                     ec2.Port.all_tcp(),
                     description=f"SSH inbound from EC2 Instance Connect ({prefix.region}) / {ip_range}",
                 )
@@ -310,10 +316,14 @@ class GameStack(Stack):
         )
 
     @cached_property
-    def hosted_zone(self):
-        """Import HostedZone into stack for setting DNS"""
-        return route53.HostedZone.from_hosted_zone_id(
-            self, "HostedZone", hosted_zone_id=self.props.hosted_zone_id
+    def hosted_zone_arn(self):
+        """Synthesize the HostedZone ARN"""
+        return Stack.of(self).format_arn(
+            service="route53",
+            region="",
+            account="",
+            resource="hostedzone",
+            resource_name=self.props.hosted_zone_id,
         )
 
     @cached_property
@@ -344,7 +354,7 @@ class GameStack(Stack):
             function_name=name,
             handler="ecs_update_r53.handler",
             initial_policy=[
-                r53_update_policy(resources=[self.hosted_zone.hosted_zone_arn]),
+                r53_update_policy(resources=[self.hosted_zone_arn]),
                 ec2_instances_read(resources=["*"]),
                 ecs_cluster_read_policy(
                     resources=[
@@ -356,7 +366,7 @@ class GameStack(Stack):
             ],
             environment={
                 "HOSTNAME": self.hostname,
-                "HOSTED_ZONE": self.hosted_zone.hosted_zone_arn,
+                "HOSTED_ZONE": self.hosted_zone_arn,
             },
         )
 
