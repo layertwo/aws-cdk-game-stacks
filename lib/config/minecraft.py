@@ -60,12 +60,12 @@ MINECRAFT_PROPS = GameProperties(
         "USE_AIKAR_FLAGS": "TRUE",
         "USE_FLARE_FLAGS": "FALSE",
     },
-    auto_start=True,
+    auto_start=False,
     start_time="0 23 * * FRI",  # Friday 3PM PST
     stop_time="0 6 * * MON",  # Sunday 10PM PST,
     domain_name="g.layertwo.dev",
     hosted_zone_id="Z09871391DBKPQ6VVS5KY",
     instance_type="t4g.large",
-    instance_connect=True,
+    instance_connect=False,
     max_mib_memory=MAX_MEMORY,
 )
