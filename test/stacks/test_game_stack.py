@@ -7,7 +7,7 @@ from lib.stacks.game_stack import GameStack
 
 def test_game_stack_synth(game_properties: GameProperties):
     app = App()
-    env = Environment(region="us-west-1")
+    env = Environment(account="000000000000", region="us-west-1")
     stack = GameStack(scope=app, props=game_properties, env=env)
 
     Template.from_stack(stack)
