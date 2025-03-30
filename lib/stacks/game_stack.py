@@ -1,7 +1,5 @@
 from functools import cached_property
-from ipaddress import IPv4Network, IPv6Network
 
-import awsipranges
 from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -174,20 +172,16 @@ class GameStack(Stack):
 
         # Allow EC2 Instance Connect
         if self.props.instance_connect:
-            ranges = awsipranges.get_ranges()
-            for prefix in ranges.filter(regions=self.region, services="EC2_INSTANCE_CONNECT"):
-                ip_range = None
-                if isinstance(prefix, IPv4Network):
-                    ip_range = (ec2.Peer.ipv4(prefix),)
-                elif isinstance(prefix, IPv6Network):
-                    ip_range = ec2.Peer.ipv6(prefix)
-                else:
-                    continue
-                sg.add_ingress_rule(
-                    ip_range,
-                    ec2.Port.all_tcp(),
-                    description=f"SSH inbound from EC2 Instance Connect ({prefix.region}) / {ip_range}",
-                )
+            prefix_list = ec2.PrefixList.from_lookup(
+                self,
+                "Ec2InstanceConnectPrefixList",
+                prefix_list_name=f"com.amazonaws.{self.region}.ec2-instance-connect",
+            )
+            sg.add_ingress_rule(
+                ec2.Peer.prefix_list(prefix_list.prefix_list_id),
+                ec2.Port.all_tcp(),
+                description="SSH inbound from EC2 Instance Connect",
+            )
         return sg
 
     def create_game_service(self) -> ecs.Ec2Service:
