@@ -1,0 +1,78 @@
+name: deploy
+
+# This workflow uses OpenID Connect (OIDC) to securely authenticate with AWS
+# without storing long-term access keys.
+#
+# Setup Instructions:
+# 1. Bootstrap CDK: cd cdk && npx cdk bootstrap aws://ACCOUNT-ID/us-east-1
+# 2. Deploy OIDC stack: cd cdk && npm run deploy:oidc
+#    (Set GITHUB_ORG and GITHUB_REPO environment variables first)
+# 3. Add GitHub secret:
+#    - AWS_ROLE_ARN: From OIDC stack output
+#
+# The OIDC stack (cdk/lib/github-oidc.ts) creates:
+# - GitHub OIDC identity provider in AWS
+# - IAM role with permissions to assume CDK bootstrap roles
+# - Proper trust policy for your repository
+#
+# For more information:
+# https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws
+
+on:
+  push:
+    branches:
+      - mainline
+    paths:
+      - 'lib/**'
+      - 'lambda/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: "ca-central-1"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC authentication
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # Python/Poetry Setup
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+            python-version: "3.14"
+            cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build package
+        run: poetry build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Synthesize
+        run: poetry run cdk synth
+
+      - name: CDK Deploy
+        run: poetry run cdk deploy --all --require-approval never --outputs-file outputs.json
+
+      - name: Display deployment outputs
+        run: |
+          if [ -f outputs.json ]; then
+            echo "Deployment outputs:"
+            cat outputs.json
+          fi
