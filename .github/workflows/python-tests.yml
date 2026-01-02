@@ -6,8 +6,9 @@ on:
     branches:
       - mainline
     paths:
-      - src/**
-      - tests/**
+      - lib/**
+      - lambda/**
+      - test/**
       - .github/workflows/python-tests.yml
 
 jobs:
