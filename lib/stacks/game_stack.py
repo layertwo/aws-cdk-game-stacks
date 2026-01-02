@@ -10,9 +10,9 @@ from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_logs as logs
 from constructs import Construct
 
-from lib.aws_common._lambda import build_lambda_function
 from lib.aws_common.ec2 import create_security_group
 from lib.aws_common.ecs import build_container
 from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy, r53_update_policy
@@ -342,11 +342,14 @@ class GameStack(Stack):
 
         name = self.qualify_name("DnsUpdateLambda")
 
-        function = build_lambda_function(
+        function = _lambda.Function(
             scope=self,
-            name=name,
+            id=name,
             function_name=name,
             handler="ecs_update_r53.handler",
+            runtime=_lambda.Runtime.PYTHON_3_14,
+            code=_lambda.Code.from_asset("./lambda"),
+            architecture=_lambda.Architecture.ARM_64,
             initial_policy=[
                 r53_update_policy(resources=[self.hosted_zone_arn]),
                 ec2_instances_read(resources=["*"]),
@@ -362,6 +365,13 @@ class GameStack(Stack):
                 "HOSTNAME": self.hostname,
                 "HOSTED_ZONE": self.hosted_zone_arn,
             },
+            timeout=Duration.minutes(1),
+            log_group=logs.LogGroup(
+                self,
+                f"{name}LogGroup",
+                log_group_name=f"/{self.props.name.lower()}/{name}",
+                retention=logs.RetentionDays.ONE_WEEK,
+            ),
         )
 
         self._ecs_task_rule.add_target(
