@@ -44,9 +44,8 @@ jobs:
 
       # Python/Poetry Setup
       - name: Install poetry
-        run: | 
-            pipx install poetry
-            pipx install aws-cdk-lib
+        run:  pipx install poetry
+
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -55,7 +54,9 @@ jobs:
             cache: 'poetry'
 
       - name: Install dependencies
-        run: poetry install
+        run: |
+            poetry install
+            pip install aws-cdk-lib
 
       - name: Build package
         run: poetry build
