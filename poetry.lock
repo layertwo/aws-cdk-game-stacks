@@ -299,20 +299,20 @@ files = [
 
 [[package]]
 name = "constructs"
-version = "10.4.2"
+version = "10.4.4"
 description = "A programming model for software-defined state"
 optional = false
-python-versions = "~=3.8"
+python-versions = "~=3.9"
 groups = ["main"]
 files = [
-    {file = "constructs-10.4.2-py3-none-any.whl", hash = "sha256:1f0f59b004edebfde0f826340698b8c34611f57848139b7954904c61645f13c1"},
-    {file = "constructs-10.4.2.tar.gz", hash = "sha256:ce54724360fffe10bab27d8a081844eb81f5ace7d7c62c84b719c49f164d5307"},
+    {file = "constructs-10.4.4-py3-none-any.whl", hash = "sha256:7c160b149aa16360531c55a55eb1aaf973fa1949f35477c6bd4f3d6171d279e5"},
+    {file = "constructs-10.4.4.tar.gz", hash = "sha256:50e9fa7bddbb09b5fc897b318f6316acccf2392850bbf45abc15438027528890"},
 ]
 
 [package.dependencies]
-jsii = ">=1.102.0,<2.0.0"
+jsii = ">=1.121.0,<2.0.0"
 publication = ">=0.0.3"
-typeguard = ">=2.13.3,<2.14.0"
+typeguard = "2.13.3"
 
 [[package]]
 name = "coverage"
@@ -578,24 +578,24 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.110.0"
+version = "1.124.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.9"
 groups = ["main"]
 files = [
-    {file = "jsii-1.110.0-py3-none-any.whl", hash = "sha256:b46fcc9f6c80e4a3d92c883138194b7311da43b9f954f8473fba8829bb3efaa1"},
-    {file = "jsii-1.110.0.tar.gz", hash = "sha256:d7b323ca66ea9260d210d96b1406671fe399ea62d075ade6374d6bf2b7a5ad33"},
+    {file = "jsii-1.124.0-py3-none-any.whl", hash = "sha256:7773c56cb31195897cff775d2f3eb85d807fdd3f3952db3039d04c8504a51366"},
+    {file = "jsii-1.124.0.tar.gz", hash = "sha256:28a4de8737ad5a7fd15e34fc55067c18243f9a422b3fb5f9ca6122db16020b9a"},
 ]
 
 [package.dependencies]
 attrs = ">=21.2,<26.0"
-cattrs = ">=1.8,<24.2"
-importlib-resources = ">=5.2.0"
+cattrs = ">=1.8,<25.4"
+importlib_resources = ">=5.2.0"
 publication = ">=0.0.3"
 python-dateutil = "*"
-typeguard = ">=2.13.3,<4.5.0"
-typing-extensions = ">=3.8,<5.0"
+typeguard = "2.13.3"
+typing_extensions = ">=3.8,<5.0"
 
 [[package]]
 name = "mccabe"
@@ -966,4 +966,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "f990b4555f4f86c45736b6052c2787b2a7ad0ddd6d92455738003a1d6a782ab4"
+content-hash = "3e3181b3a6dfd1c2c3bade968f95fb7da0ef6cad0957b66acb50c760a7dcd65e"
