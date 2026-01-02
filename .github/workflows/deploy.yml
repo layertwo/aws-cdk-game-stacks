@@ -46,16 +46,22 @@ jobs:
       - name: Install poetry
         run:  pipx install poetry
 
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
             python-version: "3.14"
             cache: 'poetry'
 
+      # Node.js/CDK Setup
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
       - name: Install dependencies
         run: |
             poetry install
+            npm install -g aws-cdk
 
       - name: Build package
         run: poetry build
@@ -67,10 +73,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Synthesize
-        run: poetry run python app.py synth
+        run: poetry run cdk synth
 
       - name: CDK Deploy
-        run: poetry run python app.py deploy --all --require-approval never --outputs-file outputs.json
+        run: poetry run cdk deploy --all --require-approval never --outputs-file outputs.json
 
       - name: Display deployment outputs
         run: |
