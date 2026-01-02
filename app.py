@@ -4,6 +4,7 @@ import os
 from aws_cdk import App, Environment
 
 from lib.config.minecraft import MINECRAFT_PROPS
+from lib.stacks.github_oidc_stack import GithubOidcStack
 from lib.stacks.minecraft_stack import MinecraftStack
 
 app = App()
@@ -12,5 +13,12 @@ env = Environment(
     region=os.environ.get("CDK_DEFAULT_REGION", "ca-central-1"),
 )
 
+github_oidc_stack = GithubOidcStack(
+    scope=app,
+    stack_id="GithubOidcStack",
+    env=env,
+    github_org="layertwo",
+    github_repo="aws-cdk-game-stacks",
+)
 minecraft_stack = MinecraftStack(scope=app, props=MINECRAFT_PROPS, env=env)
 app.synth()
