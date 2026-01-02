@@ -56,7 +56,6 @@ jobs:
       - name: Install dependencies
         run: |
             poetry install
-            pip install aws-cdk-lib
 
       - name: Build package
         run: poetry build
@@ -68,10 +67,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Synthesize
-        run: cdk synth
+        run: poetry run python app.py synth
 
       - name: CDK Deploy
-        run: cdk deploy --all --require-approval never --outputs-file outputs.json
+        run: poetry run python app.py deploy --all --require-approval never --outputs-file outputs.json
 
       - name: Display deployment outputs
         run: |
