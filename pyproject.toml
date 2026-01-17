@@ -16,6 +16,7 @@ python = "^3.13"
 aws-cdk-lib = "^2.244.0"
 constructs = "^10.5.1"
 boto3 = "^1.42.73"
+aws-cdk-aws-lambda-python-alpha = "^2.244.0a0"
 
 
 [tool.poetry.group.dev.dependencies]
