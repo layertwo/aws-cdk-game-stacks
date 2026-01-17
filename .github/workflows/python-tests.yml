@@ -1,4 +1,4 @@
-name: python build
+name: python-build
 
 on:
   workflow_dispatch:
