@@ -10,6 +10,8 @@ on:
       - lambda/**
       - test/**
       - .github/workflows/python-tests.yml
+      - pyproject.toml
+      - poetry.lock
 
 jobs:
   test:
@@ -55,7 +57,7 @@ jobs:
       with:
         name: coverage-${{ matrix.python-version }}
         path: .coverage.${{ matrix.python-version }}
-        include-hidden-files: true 
+        include-hidden-files: true
 
   coverage:
     name: coverage
@@ -64,7 +66,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
