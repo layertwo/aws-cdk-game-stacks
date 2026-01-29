@@ -193,7 +193,7 @@ class GameStack(Stack):
     def create_game_service(self) -> ecs.BaseService:
         """Create a Ec2Service"""
         self._create_container()
-        name = self.qualify_name("Service")
+        name = f"{self.props.name}{self.props.service_type.value}Service"
         if self.props.service_type == ServiceType.EC2:
             service = ecs.Ec2Service(
                 self,

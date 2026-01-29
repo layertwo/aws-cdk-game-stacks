@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Optional
 
 
 class ServiceType(Enum):
-    EC2 = "ec2"
-    FARGATE = "fargate"
+    EC2 = "EC2"
+    FARGATE = "Fargate"
 
 
 class PortType(Enum):
