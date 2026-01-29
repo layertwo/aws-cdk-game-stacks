@@ -47,7 +47,7 @@ class TraefikService(Construct):
             task = ecs.FargateTaskDefinition(
                 self,
                 "TaskDefinition",
-                cpu=128,
+                cpu=256,
                 volumes=[self.ecs_volume],
             )
         task.add_to_task_role_policy(ec2_instances_read(resources=["*"]))
@@ -93,8 +93,8 @@ class TraefikService(Construct):
                 stream_prefix="Traefik",
                 log_retention=logs.RetentionDays.ONE_WEEK,
             ),
-            cpu=128,
-            memory_limit_mib=128,
+            cpu=256,
+            memory_limit_mib=512,
             command=[
                 f"--providers.ecs.clusters={self.cluster.cluster_name}",
                 f"--providers.ecs.region={Aws.REGION}",
