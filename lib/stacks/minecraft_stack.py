@@ -1,8 +1,8 @@
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_logs as logs
 from constructs import Construct
 
-from lib.aws_common.ecs import build_container
 from lib.config import GameProperties
 from lib.constructs.traefik import TraefikService
 from lib.stacks.game_stack import GameStack, PortType
@@ -19,11 +19,15 @@ class MinecraftStack(GameStack):
         """
         Custom container create for Minecraft
         """
-        container = build_container(
-            task=self.task,
-            name=self.props.name,
-            container_image=self.props.container_image,
-            cpu=1920,
+        container = self.task.add_container(
+            f"{self.props.name}Container",
+            image=ecs.ContainerImage.from_registry(self.props.container_image),
+            essential=True,
+            logging=ecs.LogDrivers.aws_logs(
+                stream_prefix=self.props.name,
+                log_retention=logs.RetentionDays.ONE_WEEK,
+            ),
+            cpu=2048,
             memory_limit_mib=self.props.max_mib_memory,
             environment=self.props.environment,
             docker_labels={
@@ -63,6 +67,7 @@ class MinecraftStack(GameStack):
         return TraefikService(
             self,
             "TraefikService",
+            service_type=self.props.service_type,
             cluster=self.cluster,
             security_group=self.instance_security_group,
         )

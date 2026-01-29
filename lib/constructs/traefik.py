@@ -4,64 +4,95 @@ from aws_cdk import Aws
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
+from aws_cdk import aws_logs as logs
 from constructs import Construct
 
-from lib.aws_common.ecs import build_container
 from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy
+from lib.config import ServiceType
 from lib.config.minecraft import EMAIL
 
 
 class TraefikService(Construct):
     def __init__(
-        self, scope: Construct, id: str, cluster: ecs.Cluster, security_group: ec2.SecurityGroup
+        self,
+        scope: Construct,
+        id: str,
+        service_type: ServiceType,
+        cluster: ecs.Cluster,
+        security_group: ec2.SecurityGroup,
     ) -> None:
         """Traefik service"""
         super().__init__(scope, id)
         self.cluster = cluster
         self.security_group = security_group
+        self.service_type = service_type
 
         # need to create the EFS file_system and wait before it is used by ECS
         self.file_system = self.create_file_system()
         self.create_service()
 
     @cached_property
-    def task(self) -> ecs.Ec2TaskDefinition:
+    def task(self) -> ecs.TaskDefinition:
         """
         Create an ECS task for the specified
         """
-        task = ecs.Ec2TaskDefinition(
-            self,
-            "TraefikTaskDef",
-            volumes=[self.ecs_volume],
-            network_mode=ecs.NetworkMode.HOST,
-        )
+        if self.service_type == ServiceType.EC2:
+            task = ecs.Ec2TaskDefinition(
+                self,
+                "TaskDefinition",
+                volumes=[self.ecs_volume],
+                network_mode=ecs.NetworkMode.HOST,
+            )
+        elif self.service_type == ServiceType.FARGATE:
+            task = ecs.FargateTaskDefinition(
+                self,
+                "TaskDefinition",
+                cpu=128,
+                volumes=[self.ecs_volume],
+            )
         task.add_to_task_role_policy(ec2_instances_read(resources=["*"]))
         task.add_to_task_role_policy(ecs_cluster_read_policy(resources=["*"]))
+        self.build_container(task)
         return task
 
-    def create_service(self) -> ecs.Ec2Service:
-        """Create a Ec2Service from Traefik"""
-        name = "TraefikEc2Service"
-        self.build_container()
-        service = ecs.Ec2Service(
-            self,
-            name,
-            service_name=name,
-            cluster=self.cluster,
-            task_definition=self.task,
-            desired_count=1,
-            min_healthy_percent=0,
-        )
+    def create_service(self) -> ecs.BaseService:
+        """Create service for Traefik"""
+        name = "Service"
+        if self.service_type == ServiceType.EC2:
+            service = ecs.Ec2Service(
+                self,
+                name,
+                service_name=name,
+                cluster=self.cluster,
+                task_definition=self.task,
+                desired_count=1,
+                min_healthy_percent=0,
+            )
+        elif self.service_type == ServiceType.FARGATE:
+            service = ecs.FargateService(
+                self,
+                name,
+                service_name=name,
+                cluster=self.cluster,
+                task_definition=self.task,
+                desired_count=1,
+                min_healthy_percent=0,
+                assign_public_ip=True,
+            )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         service.node.add_dependency(self.file_system)
         return service
 
-    def build_container(self):
+    def build_container(self, task: ecs.TaskDefinition):
         """Use a container for reverse proxy to Minecraft plugins"""
-        container = build_container(
-            task=self.task,
-            name="Traefik",
-            container_image="traefik:v2.10",
+        container = task.add_container(
+            "Container",
+            image=ecs.ContainerImage.from_registry("traefik:v2.10"),
+            essential=True,
+            logging=ecs.LogDrivers.aws_logs(
+                stream_prefix="Traefik",
+                log_retention=logs.RetentionDays.ONE_WEEK,
+            ),
             cpu=128,
             memory_limit_mib=128,
             command=[
@@ -79,6 +110,7 @@ class TraefikService(Construct):
                 "--log.format=json",
             ],
         )
+
         ports = [80, 443, 8080]
         for port in ports:
             container.add_port_mappings(

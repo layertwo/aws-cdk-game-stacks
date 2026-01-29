@@ -3,6 +3,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
+class ServiceType(Enum):
+    EC2 = "ec2"
+    FARGATE = "fargate"
+
+
 class PortType(Enum):
     TCP = "tcp"
     UDP = "udp"
@@ -16,9 +21,11 @@ class GamePort:
 
 @dataclass(frozen=True)
 class GameProperties:
+
     name: str
     container_image: str
     container_path: str
+    service_type: ServiceType = ServiceType.FARGATE
     ports: List[GamePort] = field(default_factory=list)
     environment: Optional[Dict[str, Any]] = None
     domain_name: Optional[str] = None

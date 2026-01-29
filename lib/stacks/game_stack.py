@@ -14,9 +14,8 @@ from aws_cdk import aws_logs as logs
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
-from lib.aws_common.ecs import build_container
 from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy, r53_update_policy
-from lib.config import GameProperties, PortType
+from lib.config import GameProperties, PortType, ServiceType
 
 
 class GameStack(Stack):
@@ -27,7 +26,7 @@ class GameStack(Stack):
 
         self.service = self.create_game_service()
 
-        if self.props.auto_start:
+        if self.props.auto_start and self.props.service_type == ServiceType.EC2:
             self._create_asg_scheduled_actions()
 
         if self.props.domain_name:
@@ -60,13 +59,20 @@ class GameStack(Stack):
     def cluster(self) -> ecs.Cluster:
         name = self.qualify_name("Cluster")
         cluster = ecs.Cluster(self, name, cluster_name=name, vpc=self.vpc)
-        capacity_provider = ecs.AsgCapacityProvider(
-            self,
-            "AsgCapacityProvider",
-            auto_scaling_group=self.asg,
-            enable_managed_termination_protection=not self.props.auto_start,
-        )
-        cluster.add_asg_capacity_provider(capacity_provider)
+        if self.props.service_type == ServiceType.EC2:
+            capacity_provider = ecs.AsgCapacityProvider(
+                self,
+                "AsgCapacityProvider",
+                auto_scaling_group=self.asg,
+                enable_managed_termination_protection=not self.props.auto_start,
+            )
+            cluster.add_asg_capacity_provider(capacity_provider)
+        elif self.props.service_type == ServiceType.FARGATE:
+            cluster.enable_fargate_capacity_providers()
+            cluster.add_default_capacity_provider_strategy(
+                [ecs.CapacityProviderStrategy(capacity_provider="FARGATE_SPOT", weight=1)]
+            )
+
         return cluster
 
     @cached_property
@@ -184,28 +190,43 @@ class GameStack(Stack):
             )
         return sg
 
-    def create_game_service(self) -> ecs.Ec2Service:
+    def create_game_service(self) -> ecs.BaseService:
         """Create a Ec2Service"""
         self._create_container()
         name = self.qualify_name("Service")
-        service = ecs.Ec2Service(
-            self,
-            name,
-            service_name=name,
-            cluster=self.cluster,
-            task_definition=self.task,
-            desired_count=1,
-            min_healthy_percent=0,
-        )
+        if self.props.service_type == ServiceType.EC2:
+            service = ecs.Ec2Service(
+                self,
+                name,
+                service_name=name,
+                cluster=self.cluster,
+                task_definition=self.task,
+                desired_count=1,
+                min_healthy_percent=0,
+            )
+        if self.props.service_type == ServiceType.FARGATE:
+            service = ecs.FargateService(
+                self,
+                name,
+                service_name=name,
+                cluster=self.cluster,
+                task_definition=self.task,
+                desired_count=1,
+                min_healthy_percent=0,
+                assign_public_ip=True,
+            )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
 
     def _create_container(self) -> ecs.ContainerDefinition:
-        container = build_container(
-            task=self.task,
-            # Should this be just the property name?
-            name=self.props.name,
-            container_image=self.props.container_image,
+        container = self.task.add_container(
+            f"{self.props.name}Container",
+            image=ecs.ContainerImage.from_registry(self.props.container_image),
+            essential=True,
+            logging=ecs.LogDrivers.aws_logs(
+                stream_prefix=self.props.name,
+                log_retention=logs.RetentionDays.ONE_WEEK,
+            ),
             cpu=2048,
             memory_limit_mib=self.props.max_mib_memory,
             environment=self.props.environment,
@@ -228,16 +249,26 @@ class GameStack(Stack):
         )
 
     @cached_property
-    def task(self) -> ecs.Ec2TaskDefinition:
+    def task(self) -> ecs.TaskDefinition:
         """
         Create an ECS task for the specified
         """
-        return ecs.Ec2TaskDefinition(
-            self,
-            self.qualify_name("TaskDef"),
-            volumes=[self.ecs_volume],
-            network_mode=ecs.NetworkMode.HOST,
-        )
+        name = self.qualify_name("TaskDef")
+        if self.props.service_type == ServiceType.EC2:
+            return ecs.Ec2TaskDefinition(
+                self,
+                name,
+                volumes=[self.ecs_volume],
+                network_mode=ecs.NetworkMode.HOST,
+            )
+        elif self.props.service_type == ServiceType.FARGATE:
+            return ecs.FargateTaskDefinition(
+                self,
+                name,
+                cpu=2048,
+                memory_limit_mib=self.props.max_mib_memory,
+                volumes=[self.ecs_volume],
+            )
 
     @cached_property
     def file_system(self) -> efs.FileSystem:
