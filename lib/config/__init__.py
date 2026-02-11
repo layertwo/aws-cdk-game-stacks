@@ -25,7 +25,7 @@ class GameProperties:
     name: str
     container_image: str
     container_path: str
-    service_type: ServiceType = ServiceType.FARGATE
+    service_type: ServiceType = ServiceType.EC2
     ports: List[GamePort] = field(default_factory=list)
     environment: Optional[Dict[str, Any]] = None
     domain_name: Optional[str] = None
