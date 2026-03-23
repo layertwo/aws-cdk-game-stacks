@@ -9,6 +9,7 @@ from constructs import Construct
 
 from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy
 from lib.config import ServiceType
+from lib.config.images import TRAEFIK_IMAGE
 from lib.config.minecraft import EMAIL
 
 
@@ -87,7 +88,7 @@ class TraefikService(Construct):
         """Use a container for reverse proxy to Minecraft plugins"""
         container = task.add_container(
             "Container",
-            image=ecs.ContainerImage.from_registry("traefik:v2.10"),
+            image=ecs.ContainerImage.from_registry(TRAEFIK_IMAGE),
             essential=True,
             logging=ecs.LogDrivers.aws_logs(
                 stream_prefix="Traefik",
