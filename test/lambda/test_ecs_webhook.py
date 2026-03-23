@@ -73,21 +73,27 @@ def test_stop_returns_200(monkeypatch):
 
 def test_missing_token_returns_403(monkeypatch):
     mod = _load_handler()
+    ecs_mock = MagicMock()
+    monkeypatch.setattr(mod, "_ecs_client", ecs_mock)
     event = _url_event({"action": "start"})
     del event["headers"]["x-webhook-token"]
 
     resp = mod.handler(event, None)
 
     assert resp["statusCode"] == 403
+    ecs_mock.update_service.assert_not_called()
 
 
 def test_wrong_token_returns_403(monkeypatch):
     mod = _load_handler()
+    ecs_mock = MagicMock()
+    monkeypatch.setattr(mod, "_ecs_client", ecs_mock)
     event = _url_event({"action": "start"}, token="wrong")
 
     resp = mod.handler(event, None)
 
     assert resp["statusCode"] == 403
+    ecs_mock.update_service.assert_not_called()
 
 
 def test_invalid_action_returns_400(monkeypatch):
