@@ -23,7 +23,7 @@ MODS = [
     f"https://github.com/Multiverse/Multiverse-Core/releases/download/{MV_CORE}/multiverse-core-{MV_CORE}.jar",
     f"https://github.com/Multiverse/Multiverse-Inventories/releases/download/{MV_INV}/multiverse-inventories-{MV_INV}.jar",
     # Permissions
-    "https://download.luckperms.net/1530/bukkit/loader/LuckPerms-Bukkit-5.4.117.jar",
+    "https://download.luckperms.net/1626/bukkit/loader/LuckPerms-Bukkit-5.5.38.jar"
     "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
     # Transportation
     "https://ci.mg-dev.eu/job/TrainCarts/1518/artifact/build/TrainCarts-1.20.4-v1-1518.jar",
