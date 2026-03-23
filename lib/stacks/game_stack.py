@@ -248,6 +248,7 @@ class GameStack(Stack):
                 read_only=False,
             )
         )
+        return container
 
     @cached_property
     def task(self) -> ecs.TaskDefinition:
