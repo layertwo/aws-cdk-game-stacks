@@ -564,7 +564,5 @@ class GameStack(Stack):
         )
 
         topic = sns.Topic(self, self.qualify_name("WatchdogTopic"))
-        topic.add_subscription(
-            sns_subscriptions.LambdaSubscription(self.task_count_lambda)
-        )
+        topic.add_subscription(sns_subscriptions.LambdaSubscription(self.task_count_lambda))
         alarm.add_alarm_action(cw_actions.SnsAction(topic))
