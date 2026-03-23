@@ -70,4 +70,9 @@ MINECRAFT_PROPS = GameProperties(
     instance_type="t4g.large",
     instance_connect=False,
     max_mib_memory=MAX_MEMORY,
+    webhook_enabled=True,
+    idle_shutdown_minutes=20,
+    # Confirm these values in CloudWatch > Metrics after first run:
+    # cloudwatch_metric_namespace="Minecraft",
+    # cloudwatch_player_count_metric="players_online",
 )
