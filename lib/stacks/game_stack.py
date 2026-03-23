@@ -4,6 +4,8 @@ from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
+from aws_cdk import aws_cloudwatch as cloudwatch
+from aws_cdk import aws_cloudwatch_actions as cw_actions
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
@@ -12,10 +14,19 @@ from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_sns as sns
+from aws_cdk import aws_sns_subscriptions as sns_subscriptions
+from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
-from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy, r53_update_policy
+from lib.aws_common.iam import (
+    ec2_instances_read,
+    ecs_cluster_read_policy,
+    ecs_cluster_update_policy,
+    r53_update_policy,
+    ssm_get_parameter_policy,
+)
 from lib.config import GameProperties, PortType, ServiceType
 
 
@@ -26,6 +37,12 @@ class GameStack(Stack):
         self.props = props
 
         self.service = self.create_game_service()
+
+        if self.props.webhook_enabled:
+            self.create_webhook_lambda()
+
+        if self.props.cloudwatch_metric_namespace and self.props.cloudwatch_player_count_metric:
+            self.create_idle_watchdog_alarm()
 
         if self.props.auto_start and self.props.service_type == ServiceType.EC2:
             self._create_asg_scheduled_actions()
@@ -440,3 +457,112 @@ class GameStack(Stack):
             ),
         )
         return function
+
+    def create_webhook_lambda(self) -> _lambda.Function:
+        """Lambda with Function URL for external start/stop webhook"""
+        name = self.qualify_name("WebhookLambda")
+        ssm_token_path = f"/{self.props.name.lower()}/webhook-token"
+        # SSM parameter ARNs omit the leading slash: arn:...:parameter/testgame/webhook-token
+        # Using resource_name with a leading slash would produce a double-slash ARN (wrong).
+        ssm_token_arn = Stack.of(self).format_arn(
+            service="ssm",
+            resource="parameter",
+            resource_name=f"{self.props.name.lower()}/webhook-token",
+        )
+
+        function = _lambda.Function(
+            scope=self,
+            id=name,
+            function_name=name,
+            handler="ecs_webhook.handler",
+            runtime=_lambda.Runtime.PYTHON_3_14,
+            code=_lambda.Code.from_asset("./lambda"),
+            architecture=_lambda.Architecture.ARM_64,
+            timeout=Duration.seconds(30),
+            initial_policy=[
+                ssm_get_parameter_policy(resources=[ssm_token_arn]),
+                ecs_cluster_update_policy(resources=[self.service.service_arn]),
+                ecs_cluster_read_policy(
+                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                ),
+            ],
+            environment={
+                "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
+                "ECS_SERVICE_NAME": self.service.service_name,
+                "WEBHOOK_TOKEN_SSM_PATH": ssm_token_path,
+            },
+            log_group=logs.LogGroup(
+                self,
+                f"{name}LogGroup",
+                log_group_name=f"/{self.props.name.lower()}/{name}",
+                retention=logs.RetentionDays.ONE_WEEK,
+            ),
+        )
+
+        url = function.add_function_url(
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
+        )
+
+        ssm.StringParameter(
+            self,
+            self.qualify_name("WebhookUrlParam"),
+            parameter_name=f"/{self.props.name.lower()}/webhook-url",
+            string_value=url.url,
+        )
+
+        return function
+
+    @cached_property
+    def task_count_lambda(self) -> _lambda.Function:
+        """Lambda that sets ECS service desiredCount — used by the watchdog SNS alarm"""
+        name = self.qualify_name("TaskCountLambda")
+        return _lambda.Function(
+            scope=self,
+            id=name,
+            function_name=name,
+            handler="ecs_desired_task_count.handler",
+            runtime=_lambda.Runtime.PYTHON_3_14,
+            code=_lambda.Code.from_asset("./lambda"),
+            architecture=_lambda.Architecture.ARM_64,
+            timeout=Duration.seconds(30),
+            initial_policy=[
+                ecs_cluster_update_policy(resources=[self.service.service_arn]),
+            ],
+            environment={
+                "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
+                "ECS_SERVICE_NAME": self.service.service_name,
+            },
+            log_group=logs.LogGroup(
+                self,
+                f"{name}LogGroup",
+                log_group_name=f"/{self.props.name.lower()}/{name}",
+                retention=logs.RetentionDays.ONE_WEEK,
+            ),
+        )
+
+    def create_idle_watchdog_alarm(self) -> None:
+        """CloudWatch Alarm that stops the server after N idle minutes"""
+        evaluation_periods = self.props.idle_shutdown_minutes // 5
+
+        metric = cloudwatch.Metric(
+            namespace=self.props.cloudwatch_metric_namespace,
+            metric_name=self.props.cloudwatch_player_count_metric,
+            statistic="Maximum",
+            period=Duration.minutes(5),
+        )
+
+        alarm = cloudwatch.Alarm(
+            self,
+            self.qualify_name("IdleWatchdogAlarm"),
+            alarm_name=self.qualify_name("IdleWatchdogAlarm"),
+            metric=metric,
+            threshold=0,
+            comparison_operator=cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+            evaluation_periods=evaluation_periods,
+            datapoints_to_alarm=evaluation_periods,
+            treat_missing_data=cloudwatch.TreatMissingData.BREACHING,
+        )
+
+        topic = sns.Topic(self, self.qualify_name("WatchdogTopic"))
+        topic.add_subscription(sns_subscriptions.LambdaSubscription(self.task_count_lambda))
+        alarm.add_alarm_action(cw_actions.SnsAction(topic))
