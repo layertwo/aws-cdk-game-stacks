@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from aws_cdk import Duration, Stack, Tags
+from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -15,7 +16,13 @@ from aws_cdk import aws_logs as logs
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
-from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy, r53_update_policy
+from lib.aws_common.iam import (
+    ec2_instances_read,
+    ecs_cluster_read_policy,
+    ecs_cluster_update_policy,
+    r53_update_policy,
+    ssm_get_parameter_policy,
+)
 from lib.config import GameProperties, PortType, ServiceType
 
 
@@ -26,6 +33,9 @@ class GameStack(Stack):
         self.props = props
 
         self.service = self.create_game_service()
+
+        if self.props.webhook_enabled:
+            self.create_webhook_lambda()
 
         if self.props.auto_start and self.props.service_type == ServiceType.EC2:
             self._create_asg_scheduled_actions()
@@ -439,4 +449,56 @@ class GameStack(Stack):
                 handler=function,
             ),
         )
+        return function
+
+    def create_webhook_lambda(self) -> _lambda.Function:
+        """Lambda with Function URL for external start/stop webhook"""
+        name = self.qualify_name("WebhookLambda")
+        ssm_token_path = f"/{self.props.name.lower()}/webhook-token"
+        ssm_token_arn = Stack.of(self).format_arn(
+            service="ssm",
+            resource="parameter",
+            resource_name=f"{self.props.name.lower()}/webhook-token",
+        )
+
+        function = _lambda.Function(
+            scope=self,
+            id=name,
+            function_name=name,
+            handler="ecs_webhook.handler",
+            runtime=_lambda.Runtime.PYTHON_3_14,
+            code=_lambda.Code.from_asset("./lambda"),
+            architecture=_lambda.Architecture.ARM_64,
+            timeout=Duration.seconds(30),
+            initial_policy=[
+                ssm_get_parameter_policy(resources=[ssm_token_arn]),
+                ecs_cluster_update_policy(resources=[self.service.service_arn]),
+                ecs_cluster_read_policy(
+                    resources=[self.cluster.cluster_arn, self.service.service_arn]
+                ),
+            ],
+            environment={
+                "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
+                "ECS_SERVICE_NAME": self.service.service_name,
+                "WEBHOOK_TOKEN_SSM_PATH": ssm_token_path,
+            },
+            log_group=logs.LogGroup(
+                self,
+                f"{name}LogGroup",
+                log_group_name=f"/{self.props.name.lower()}/{name}",
+                retention=logs.RetentionDays.ONE_WEEK,
+            ),
+        )
+
+        url = function.add_function_url(
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
+        )
+
+        ssm.StringParameter(
+            self,
+            self.qualify_name("WebhookUrlParam"),
+            parameter_name=f"/{self.props.name.lower()}/webhook-url",
+            string_value=url.url,
+        )
+
         return function
