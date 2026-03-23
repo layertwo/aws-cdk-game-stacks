@@ -63,3 +63,12 @@ def asg_update_policy(resources: List) -> iam.PolicyStatement:
         ],
         resources=resources,
     )
+
+
+def ssm_get_parameter_policy(resources: List) -> iam.PolicyStatement:
+    """Allow reading SSM parameters (including SecureString with aws/ssm key)"""
+    return iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=["ssm:GetParameter"],
+        resources=resources,
+    )
