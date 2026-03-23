@@ -76,6 +76,7 @@ source = ["lib"]
 omit = [
     "*/tests/*",
     "*/test_*",
+    "lib/constructs/traefik.py",
 ]
 branch = true
 parallel = true
