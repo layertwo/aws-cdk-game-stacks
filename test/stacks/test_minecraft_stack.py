@@ -60,7 +60,6 @@ def test_minecraft_fargate_service_public_ip_and_sg(fargate_game_properties: Gam
 
 
 def test_webhook_lambda_created(webhook_game_properties):
-    from lib.stacks.minecraft_stack import MinecraftStack
     app = App()
     env = Environment(account="000000000000", region="us-west-1")
     stack = MinecraftStack(scope=app, props=webhook_game_properties, env=env)
@@ -74,7 +73,6 @@ def test_webhook_lambda_created(webhook_game_properties):
 
 
 def test_webhook_function_url_created(webhook_game_properties):
-    from lib.stacks.minecraft_stack import MinecraftStack
     app = App()
     env = Environment(account="000000000000", region="us-west-1")
     stack = MinecraftStack(scope=app, props=webhook_game_properties, env=env)
@@ -88,7 +86,6 @@ def test_webhook_function_url_created(webhook_game_properties):
 
 
 def test_webhook_url_stored_in_ssm(webhook_game_properties):
-    from lib.stacks.minecraft_stack import MinecraftStack
     app = App()
     env = Environment(account="000000000000", region="us-west-1")
     stack = MinecraftStack(scope=app, props=webhook_game_properties, env=env)
@@ -101,7 +98,6 @@ def test_webhook_url_stored_in_ssm(webhook_game_properties):
 
 
 def test_webhook_not_created_when_disabled(fargate_game_properties):
-    from lib.stacks.minecraft_stack import MinecraftStack
     app = App()
     env = Environment(account="000000000000", region="us-west-1")
     stack = MinecraftStack(scope=app, props=fargate_game_properties, env=env)

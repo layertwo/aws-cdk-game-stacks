@@ -1,7 +1,6 @@
 from functools import cached_property
 
 from aws_cdk import Duration, Stack, Tags
-from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -13,6 +12,7 @@ from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
+from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
@@ -455,6 +455,8 @@ class GameStack(Stack):
         """Lambda with Function URL for external start/stop webhook"""
         name = self.qualify_name("WebhookLambda")
         ssm_token_path = f"/{self.props.name.lower()}/webhook-token"
+        # SSM parameter ARNs omit the leading slash: arn:...:parameter/testgame/webhook-token
+        # Using resource_name with a leading slash would produce a double-slash ARN (wrong).
         ssm_token_arn = Stack.of(self).format_arn(
             service="ssm",
             resource="parameter",
