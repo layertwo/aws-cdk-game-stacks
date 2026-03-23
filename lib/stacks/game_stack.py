@@ -325,7 +325,7 @@ class GameStack(Stack):
                         minute="0", hour="9", week_day="SAT,SUN,MON"
                     ),
                     move_to_cold_storage_after=Duration.days(14),
-                    delete_after=Duration.days(90),
+                    delete_after=Duration.days(104),
                 )
             ],
         )
