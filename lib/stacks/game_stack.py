@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from aws_cdk import Duration, Stack, Tags
+from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
 from aws_cdk import aws_ec2 as ec2
@@ -28,6 +29,9 @@ class GameStack(Stack):
 
         if self.props.auto_start and self.props.service_type == ServiceType.EC2:
             self._create_asg_scheduled_actions()
+
+        if self.props.auto_start and self.props.service_type == ServiceType.FARGATE:
+            self._create_fargate_scheduled_actions()
 
         if self.props.domain_name:
             self.create_dns_update_lambda()
@@ -99,6 +103,29 @@ class GameStack(Stack):
             auto_scaling_group=self.asg,
             schedule=autoscaling.Schedule.expression(self.props.stop_time),
             desired_capacity=0,
+        )
+
+    def _create_fargate_scheduled_actions(self) -> None:
+        # Application Auto Scaling uses CloudWatch Events cron (6-field: min hour dom month dow year)
+        # GameProperties stores 5-field cron; convert by replacing dom wildcard with ? when dow is set
+        def to_cw_cron(expr: str) -> appscaling.Schedule:
+            min_, hour, dom, month, dow = expr.split()
+            if dow != "*" and dom == "*":
+                dom = "?"
+            return appscaling.Schedule.expression(f"cron({min_} {hour} {dom} {month} {dow} *)")
+
+        self.scalable_task.scale_on_schedule(
+            self.qualify_name("FargateStartAction"),
+            schedule=to_cw_cron(self.props.start_time),
+            min_capacity=1,
+            max_capacity=1,
+        )
+
+        self.scalable_task.scale_on_schedule(
+            self.qualify_name("FargateStopAction"),
+            schedule=to_cw_cron(self.props.stop_time),
+            min_capacity=0,
+            max_capacity=0,
         )
 
     @property
@@ -205,12 +232,14 @@ class GameStack(Stack):
                 service_name=name,
                 cluster=self.cluster,
                 task_definition=self.task,
-                desired_count=1,
+                desired_count=0,
                 min_healthy_percent=0,
                 assign_public_ip=True,
                 security_groups=[self.instance_security_group],
             )
-        service.auto_scale_task_count(max_capacity=1, min_capacity=1)
+            self.scalable_task = service.auto_scale_task_count(max_capacity=1, min_capacity=0)
+        else:
+            service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
 
     def _create_container(self) -> ecs.ContainerDefinition:
