@@ -1,67 +1,44 @@
-import os
-from unittest.mock import MagicMock, patch
+from src.entrypoint import ecs_desired_task_count
 
 
-def _get_handler():
-    with patch.dict(
-        os.environ,
-        {
-            "ECS_CLUSTER_ARN": "arn:aws:ecs:us-east-1:000000000000:cluster/TestCluster",
-            "ECS_SERVICE_NAME": "TestService",
+def test_stop_action_sets_desired_count_zero(cluster_arn, service_name, ecs_stubber):
+    ecs_stubber.add_response(
+        "update_service",
+        {},
+        expected_params={
+            "cluster": cluster_arn,
+            "service": service_name,
+            "desiredCount": 0,
         },
-    ):
-        from src.entrypoint import ecs_desired_task_count
-
-        return ecs_desired_task_count
-
-
-_ENV = {
-    "ECS_CLUSTER_ARN": "arn:aws:ecs:us-east-1:000000000000:cluster/TestCluster",
-    "ECS_SERVICE_NAME": "TestService",
-}
-
-
-def test_stop_action_sets_desired_count_zero(monkeypatch):
-    mod = _get_handler()
-    ecs_mock = MagicMock()
-    for k, v in _ENV.items():
-        monkeypatch.setenv(k, v)
-    with patch("boto3.client", return_value=ecs_mock):
-        import importlib
-
-        importlib.reload(mod)
-        mod.handler({"action": "stop"}, None)
-    ecs_mock.update_service.assert_called_once_with(
-        cluster="arn:aws:ecs:us-east-1:000000000000:cluster/TestCluster",
-        service="TestService",
-        desiredCount=0,
     )
+    ecs_desired_task_count.handler({"action": "stop"}, None)
 
 
-def test_start_action_sets_desired_count_one(monkeypatch):
-    mod = _get_handler()
-    ecs_mock = MagicMock()
-    for k, v in _ENV.items():
-        monkeypatch.setenv(k, v)
-    with patch("boto3.client", return_value=ecs_mock):
-        import importlib
-
-        importlib.reload(mod)
-        mod.handler({"action": "start"}, None)
-    ecs_mock.update_service.assert_called_once_with(
-        cluster="arn:aws:ecs:us-east-1:000000000000:cluster/TestCluster",
-        service="TestService",
-        desiredCount=1,
+def test_start_action_sets_desired_count_one(cluster_arn, service_name, ecs_stubber):
+    ecs_stubber.add_response(
+        "update_service",
+        {},
+        expected_params={
+            "cluster": cluster_arn,
+            "service": service_name,
+            "desiredCount": 1,
+        },
     )
+    ecs_desired_task_count.handler({"action": "start"}, None)
 
 
-def test_sns_envelope_defaults_to_stop(monkeypatch):
+def test_sns_envelope_defaults_to_stop(cluster_arn, service_name, ecs_stubber):
     """SNS delivers a Records envelope with no top-level 'action' key.
     The handler defaults to 'stop', which is the intended watchdog behavior."""
-    mod = _get_handler()
-    ecs_mock = MagicMock()
-    for k, v in _ENV.items():
-        monkeypatch.setenv(k, v)
+    ecs_stubber.add_response(
+        "update_service",
+        {},
+        expected_params={
+            "cluster": cluster_arn,
+            "service": service_name,
+            "desiredCount": 0,
+        },
+    )
     sns_event = {
         "Records": [
             {
@@ -70,13 +47,4 @@ def test_sns_envelope_defaults_to_stop(monkeypatch):
             }
         ]
     }
-    with patch("boto3.client", return_value=ecs_mock):
-        import importlib
-
-        importlib.reload(mod)
-        mod.handler(sns_event, None)
-    ecs_mock.update_service.assert_called_once_with(
-        cluster="arn:aws:ecs:us-east-1:000000000000:cluster/TestCluster",
-        service="TestService",
-        desiredCount=0,
-    )
+    ecs_desired_task_count.handler(sns_event, None)

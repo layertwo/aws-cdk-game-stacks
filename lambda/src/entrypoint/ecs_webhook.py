@@ -2,6 +2,7 @@ import hmac
 import json
 import logging
 import os
+from functools import lru_cache
 
 import boto3
 import botocore.exceptions
@@ -9,18 +10,11 @@ import botocore.exceptions
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# Module-level cache — populated on cold start
-_token: str = ""
-_ecs_client = boto3.client("ecs")
 
-
-def _load_token() -> str:
-    global _token
-    if _token:
-        return _token
-    ssm = boto3.client("ssm")
+@lru_cache
+def _load_token(ssm_client) -> str:
     try:
-        resp = ssm.get_parameter(
+        resp = ssm_client.get_parameter(
             Name=os.environ["WEBHOOK_TOKEN_SSM_PATH"],
             WithDecryption=True,
         )
@@ -33,8 +27,7 @@ def _load_token() -> str:
             )
             return ""  # empty string — compare_digest("", expected) returns False → 403
         raise
-    _token = resp["Parameter"]["Value"]
-    return _token
+    return resp["Parameter"]["Value"]
 
 
 def _response(status_code: int, body: dict) -> dict:
@@ -46,13 +39,17 @@ def _response(status_code: int, body: dict) -> dict:
 
 
 def handler(event, context) -> dict:
+
+    session = boto3.Session()
+    ecs_client = session.client("ecs")
+    ssm_client = session.client("ssm")
     # Function URL events have requestContext.http; other invocations do not.
     is_url_invocation = bool(event.get("requestContext", {}).get("http"))
 
     if is_url_invocation:
         headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
         provided = headers.get("x-webhook-token", "")
-        expected = _load_token()
+        expected = _load_token(ssm_client)
         if not hmac.compare_digest(provided, expected):
             logger.warning("Rejected request: invalid or missing token")
             return _response(403, {"error": "forbidden"})
@@ -74,7 +71,7 @@ def handler(event, context) -> dict:
     service_name = os.environ["ECS_SERVICE_NAME"]
 
     logger.info(f"action={action} desired_count={desired_count} service={service_name}")
-    _ecs_client.update_service(
+    ecs_client.update_service(
         cluster=cluster_arn,
         service=service_name,
         desiredCount=desired_count,
