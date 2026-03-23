@@ -54,7 +54,7 @@ class GithubOidcStack(Stack):
                     },
                 },
             ),
-            max_session_duration=Duration.hours(1),
+            max_session_duration=Duration.hours(4),
         )
 
         self.role.add_to_policy(
