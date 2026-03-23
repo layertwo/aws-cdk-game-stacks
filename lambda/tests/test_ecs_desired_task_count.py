@@ -10,7 +10,7 @@ def _get_handler():
             "ECS_SERVICE_NAME": "TestService",
         },
     ):
-        import ecs_desired_task_count
+        from src.entrypoint import ecs_desired_task_count
 
         return ecs_desired_task_count
 

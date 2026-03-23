@@ -29,7 +29,7 @@ def _load_handler(ssm_token: str = "secret"):
         },
     ):
         with patch("boto3.client", return_value=ssm_mock):
-            import ecs_webhook
+            from src.entrypoint import ecs_webhook
 
             importlib.reload(ecs_webhook)
             ecs_webhook._token = ssm_token  # inject cached token

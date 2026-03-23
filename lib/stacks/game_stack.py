@@ -1,5 +1,6 @@
 from functools import cached_property
 
+import uv_python_lambda
 from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
@@ -13,7 +14,6 @@ from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
-from aws_cdk import aws_lambda_python_alpha as lambda_alpha
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_route53 as route53
 from aws_cdk import aws_sns as sns
@@ -409,18 +409,29 @@ class GameStack(Stack):
     def fqdn(self) -> str:
         return f"{self.hostname}.{self.props.domain_name}"
 
-    def create_dns_update_lambda(self) -> lambda_alpha.PythonFunction:
+    def create_dns_update_lambda(self) -> uv_python_lambda.PythonFunction:
         """Lambda that updates route 53 dns"""
 
         name = self.qualify_name("DnsUpdateLambda")
-        fn = lambda_alpha.PythonFunction(
+        fn = uv_python_lambda.PythonFunction(
             scope=self,
             id=name,
             function_name=name,
+            root_dir="./lambda",
+            index="src/entrypoint/__init__.py",
             handler="ecs_update_r53_handler",
             runtime=_lambda.Runtime.PYTHON_3_14,
-            entry="./lambda",
             architecture=_lambda.Architecture.ARM_64,
+            bundling=uv_python_lambda.BundlingOptions(
+                asset_excludes=[
+                    ".venv/",
+                    ".git/",
+                    "tests/",
+                    "htmlcov/",
+                    ".pytest_cache/",
+                    "__pycache__/",
+                ],
+            ),
             initial_policy=[
                 r53_update_policy(resources=[self.hosted_zone.hosted_zone_arn]),
                 ec2_instances_read(resources=["*"]),
@@ -452,7 +463,7 @@ class GameStack(Stack):
         )
         return fn
 
-    def create_webhook_lambda(self) -> _lambda.Function:
+    def create_webhook_lambda(self) -> uv_python_lambda.PythonFunction:
         """Lambda with Function URL for external start/stop webhook"""
         name = self.qualify_name("WebhookLambda")
         ssm_token_path = f"/{self.props.name.lower()}/webhook-token"
@@ -464,14 +475,25 @@ class GameStack(Stack):
             resource_name=f"{self.props.name.lower()}/webhook-token",
         )
 
-        function = _lambda.Function(
+        function = uv_python_lambda.PythonFunction(
             scope=self,
             id=name,
             function_name=name,
-            handler="ecs_webhook.handler",
+            root_dir="./lambda",
+            index="src/entrypoint/__init__.py",
+            handler="ecs_webhook_handler",
             runtime=_lambda.Runtime.PYTHON_3_14,
-            code=_lambda.Code.from_asset("./lambda"),
             architecture=_lambda.Architecture.ARM_64,
+            bundling=uv_python_lambda.BundlingOptions(
+                asset_excludes=[
+                    ".venv/",
+                    ".git/",
+                    "tests/",
+                    "htmlcov/",
+                    ".pytest_cache/",
+                    "__pycache__/",
+                ],
+            ),
             timeout=Duration.seconds(30),
             initial_policy=[
                 ssm_get_parameter_policy(resources=[ssm_token_arn]),
@@ -507,17 +529,28 @@ class GameStack(Stack):
         return function
 
     @cached_property
-    def task_count_lambda(self) -> _lambda.Function:
+    def task_count_lambda(self) -> uv_python_lambda.PythonFunction:
         """Lambda that sets ECS service desiredCount — used by the watchdog SNS alarm"""
         name = self.qualify_name("TaskCountLambda")
-        return _lambda.Function(
+        return uv_python_lambda.PythonFunction(
             scope=self,
             id=name,
             function_name=name,
-            handler="ecs_desired_task_count.handler",
+            root_dir="./lambda",
+            index="src/entrypoint/__init__.py",
+            handler="ecs_desired_task_count_handler",
             runtime=_lambda.Runtime.PYTHON_3_14,
-            code=_lambda.Code.from_asset("./lambda"),
             architecture=_lambda.Architecture.ARM_64,
+            bundling=uv_python_lambda.BundlingOptions(
+                asset_excludes=[
+                    ".venv/",
+                    ".git/",
+                    "tests/",
+                    "htmlcov/",
+                    ".pytest_cache/",
+                    "__pycache__/",
+                ],
+            ),
             timeout=Duration.seconds(30),
             initial_policy=[
                 ecs_cluster_update_policy(resources=[self.service.service_arn]),
