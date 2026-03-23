@@ -13,11 +13,6 @@ def _url_event(body: dict, token: str = "secret") -> dict:
     }
 
 
-# Helper to build a raw invocation event (no Function URL wrapper)
-def _raw_event(body: dict) -> dict:
-    return body
-
-
 def _load_handler(ssm_token: str = "secret"):
     """Import ecs_webhook with a mocked SSM client returning ssm_token."""
     ssm_mock = MagicMock()

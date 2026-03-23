@@ -4,6 +4,7 @@ import logging
 import os
 
 import boto3
+import botocore.exceptions
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -18,10 +19,20 @@ def _load_token() -> str:
     if _token:
         return _token
     ssm = boto3.client("ssm")
-    resp = ssm.get_parameter(
-        Name=os.environ["WEBHOOK_TOKEN_SSM_PATH"],
-        WithDecryption=True,
-    )
+    try:
+        resp = ssm.get_parameter(
+            Name=os.environ["WEBHOOK_TOKEN_SSM_PATH"],
+            WithDecryption=True,
+        )
+    except botocore.exceptions.ClientError as e:
+        if e.response["Error"]["Code"] == "ParameterNotFound":
+            logger.error(
+                "Webhook token not configured. Run: aws ssm put-parameter "
+                "--name %s --type SecureString --value <your-secret>",
+                os.environ["WEBHOOK_TOKEN_SSM_PATH"],
+            )
+            return ""  # empty string — compare_digest("", expected) returns False → 403
+        raise
     _token = resp["Parameter"]["Value"]
     return _token
 
