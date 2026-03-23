@@ -236,6 +236,9 @@ class GameStack(Stack):
                 min_healthy_percent=0,
                 assign_public_ip=True,
                 security_groups=[self.instance_security_group],
+                capacity_provider_strategies=[
+                    ecs.CapacityProviderStrategy(capacity_provider="FARGATE_SPOT", weight=1),
+                ],
             )
             self.scalable_task = service.auto_scale_task_count(max_capacity=1, min_capacity=0)
         else:
@@ -306,7 +309,7 @@ class GameStack(Stack):
             lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
             out_of_infrequent_access_policy=efs.OutOfInfrequentAccessPolicy.AFTER_1_ACCESS,
             performance_mode=efs.PerformanceMode.GENERAL_PURPOSE,
-            throughput_mode=efs.ThroughputMode.ELASTIC,
+            throughput_mode=efs.ThroughputMode.BURSTING,
             security_group=self.efs_security_group,
         )
         file_system.add_access_point(name, path="/")
@@ -322,6 +325,7 @@ class GameStack(Stack):
                         minute="0", hour="9", week_day="SAT,SUN,MON"
                     ),
                     move_to_cold_storage_after=Duration.days(14),
+                    delete_after=Duration.days(90),
                 )
             ],
         )

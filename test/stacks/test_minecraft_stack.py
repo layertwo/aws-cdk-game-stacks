@@ -44,7 +44,9 @@ def test_minecraft_fargate_service_public_ip_and_sg(fargate_game_properties: Gam
     template.has_resource_properties(
         "AWS::ECS::Service",
         {
-            "LaunchType": "FARGATE",
+            "CapacityProviderStrategy": Match.array_with(
+                [Match.object_like({"CapacityProvider": "FARGATE_SPOT"})]
+            ),
             "NetworkConfiguration": {
                 "AwsvpcConfiguration": {
                     "AssignPublicIp": "ENABLED",
