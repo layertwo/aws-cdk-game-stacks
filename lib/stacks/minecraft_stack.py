@@ -52,4 +52,3 @@ class MinecraftStack(GameStack):
         self.task.add_to_task_role_policy(
             iam.PolicyStatement(actions=["cloudwatch:PutMetricData"], resources=["*"])
         )
-

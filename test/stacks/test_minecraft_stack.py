@@ -48,7 +48,9 @@ def test_minecraft_fargate_service_public_ip_and_sg(fargate_game_properties: Gam
             "NetworkConfiguration": {
                 "AwsvpcConfiguration": {
                     "AssignPublicIp": "ENABLED",
-                    "SecurityGroups": Match.array_with([Match.object_like({"Fn::GetAtt": Match.any_value()})]),
+                    "SecurityGroups": Match.array_with(
+                        [Match.object_like({"Fn::GetAtt": Match.any_value()})]
+                    ),
                 }
             },
         },
