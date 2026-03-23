@@ -67,12 +67,6 @@ class GameStack(Stack):
                 enable_managed_termination_protection=not self.props.auto_start,
             )
             cluster.add_asg_capacity_provider(capacity_provider)
-        elif self.props.service_type == ServiceType.FARGATE:
-            cluster.enable_fargate_capacity_providers()
-            cluster.add_default_capacity_provider_strategy(
-                [ecs.CapacityProviderStrategy(capacity_provider="FARGATE_SPOT", weight=1)]
-            )
-
         return cluster
 
     @cached_property
