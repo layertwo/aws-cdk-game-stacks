@@ -1,12 +1,13 @@
 from lib.config import GamePort, GameProperties, PortType, ServiceType
+from lib.config.images import MINECRAFT_IMAGE
 
 EMAIL = "aws+minecraft@layertwo.dev"
 
-MC_VERSION = "1.20.4"
-ESSENTIALS_VER = "2.20.1"
-VOXEL_SNIPER_VER = "8.13.0"
-MV_CORE = "4.3.12"
-MV_INV = "4.2.6"
+MC_VERSION = "1.21.1"
+ESSENTIALS_VER = "2.21.2"
+VOXEL_SNIPER_VER = "8.14.0"
+MV_CORE = "5.5.3"
+MV_INV = "5.3.2"
 
 MODS = [
     # Essentials
@@ -26,11 +27,11 @@ MODS = [
     "https://download.luckperms.net/1626/bukkit/loader/LuckPerms-Bukkit-5.5.38.jar"
     "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
     # Transportation
-    "https://ci.mg-dev.eu/job/TrainCarts/1518/artifact/build/TrainCarts-1.20.4-v1-1518.jar",
-    "https://ci.mg-dev.eu/job/BKCommonLib/1663/artifact/build/BKCommonLib-1.20.4-v1-1663.jar",
+    "https://ci.mg-dev.eu/job/TrainCarts/1686/artifact/build/TrainCarts-1.21.11-v2-1686.jar",
+    "https://ci.mg-dev.eu/job/BKCommonLib/1957/artifact/build/BKCommonLib-1.21.11-v1-1957.jar",
     # World viewing
     # "https://cdn.modrinth.com/data/YMXhf1UJ/versions/Aziw81Ii/Pl3xMap-1.20.1-469.jar",
-    "https://github.com/DecentSoftware-eu/DecentHolograms/releases/download/2.8.6/DecentHolograms-2.8.6.jar",
+    "https://github.com/DecentSoftware-eu/DecentHolograms/releases/download/2.9.9/DecentHolograms-2.9.9.jar",
     # Monitoring - AWS
     "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.2.0/CloudWatch-1.2.0.jar",
 ]
@@ -38,7 +39,7 @@ MODS = [
 MAX_MEMORY = 6144
 MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
-    container_image="itzg/minecraft-server:java17-jdk",
+    container_image=MINECRAFT_IMAGE,
     container_path="/data",
     service_type=ServiceType.FARGATE,
     ports=[GamePort(port_type=PortType.TCP, number=25565)],
