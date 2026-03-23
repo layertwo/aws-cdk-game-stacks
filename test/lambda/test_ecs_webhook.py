@@ -16,9 +16,7 @@ def _url_event(body: dict, token: str = "secret") -> dict:
 def _load_handler(ssm_token: str = "secret"):
     """Import ecs_webhook with a mocked SSM client returning ssm_token."""
     ssm_mock = MagicMock()
-    ssm_mock.get_parameter.return_value = {
-        "Parameter": {"Value": ssm_token}
-    }
+    ssm_mock.get_parameter.return_value = {"Parameter": {"Value": ssm_token}}
     boto3_mock = MagicMock()
     boto3_mock.client.return_value = ssm_mock
 
@@ -32,6 +30,7 @@ def _load_handler(ssm_token: str = "secret"):
     ):
         with patch("boto3.client", return_value=ssm_mock):
             import ecs_webhook
+
             importlib.reload(ecs_webhook)
             ecs_webhook._token = ssm_token  # inject cached token
     return ecs_webhook

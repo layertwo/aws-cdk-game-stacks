@@ -11,6 +11,7 @@ def _get_handler():
         },
     ):
         import ecs_desired_task_count
+
         return ecs_desired_task_count
 
 
@@ -27,6 +28,7 @@ def test_stop_action_sets_desired_count_zero(monkeypatch):
         monkeypatch.setenv(k, v)
     with patch("boto3.client", return_value=ecs_mock):
         import importlib
+
         importlib.reload(mod)
         mod.handler({"action": "stop"}, None)
     ecs_mock.update_service.assert_called_once_with(
@@ -43,6 +45,7 @@ def test_start_action_sets_desired_count_one(monkeypatch):
         monkeypatch.setenv(k, v)
     with patch("boto3.client", return_value=ecs_mock):
         import importlib
+
         importlib.reload(mod)
         mod.handler({"action": "start"}, None)
     ecs_mock.update_service.assert_called_once_with(
@@ -69,6 +72,7 @@ def test_sns_envelope_defaults_to_stop(monkeypatch):
     }
     with patch("boto3.client", return_value=ecs_mock):
         import importlib
+
         importlib.reload(mod)
         mod.handler(sns_event, None)
     ecs_mock.update_service.assert_called_once_with(

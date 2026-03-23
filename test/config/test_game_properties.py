@@ -2,7 +2,6 @@ import pytest
 
 from lib.config import GameProperties, GamePort, PortType, ServiceType
 
-
 BASE_KWARGS = dict(
     name="TestGame",
     container_image="img:latest",
