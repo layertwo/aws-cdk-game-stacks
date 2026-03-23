@@ -12,19 +12,19 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = "^3.11"
-aws-cdk-lib = "^2.186.0"
-constructs = "^10.4.4"
-boto3 = "^1.42.19"
+python = "^3.13"
+aws-cdk-lib = "^2.244.0"
+constructs = "^10.5.1"
+boto3 = "^1.42.73"
 
 
 [tool.poetry.group.dev.dependencies]
-isort = "^7.0.0"
-black = "^26.0.0"
+isort = "^8.0.0"
+black = "^26.3.0"
 flake8 = "^7.3.0"
 flake8-pyproject = "^1.2.4"
 pytest = "^9.0.0"
-pytest-cov = "^7.0.0"
+pytest-cov = "^7.1.0"
 
 [build-system]
 requires = ["poetry-core"]
