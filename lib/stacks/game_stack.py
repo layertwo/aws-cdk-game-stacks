@@ -214,6 +214,7 @@ class GameStack(Stack):
                 desired_count=1,
                 min_healthy_percent=0,
                 assign_public_ip=True,
+                security_groups=[self.instance_security_group],
             )
         service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
@@ -247,6 +248,7 @@ class GameStack(Stack):
                 read_only=False,
             )
         )
+        return container
 
     @cached_property
     def task(self) -> ecs.TaskDefinition:
