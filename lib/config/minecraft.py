@@ -1,4 +1,5 @@
 from lib.config import GamePort, GameProperties, PortType, ServiceType
+from lib.config.images import MINECRAFT_IMAGE
 
 EMAIL = "aws+minecraft@layertwo.dev"
 
@@ -38,7 +39,7 @@ MODS = [
 MAX_MEMORY = 6144
 MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
-    container_image="itzg/minecraft-server:java17-jdk",
+    container_image=MINECRAFT_IMAGE,
     container_path="/data",
     service_type=ServiceType.FARGATE,
     ports=[GamePort(port_type=PortType.TCP, number=25565)],
