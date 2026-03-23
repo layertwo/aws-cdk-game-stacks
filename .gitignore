@@ -130,4 +130,4 @@ dmypy.json
 cdk.context.json
 cdk.out/
 .worktrees/
-.worktrees/
+docs/
