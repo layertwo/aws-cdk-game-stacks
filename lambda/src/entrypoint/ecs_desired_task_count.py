@@ -19,6 +19,8 @@ def handler(event, context):
     if status == "start":
         desired_count = 1
 
-    client = boto3.client("ecs")
+    session = boto3.Session()
+    client = session.client("ecs")
+
     client.update_service(cluster=cluster_arn, service=service_name, desiredCount=desired_count)
     logger.info(f"updated desired count to {desired_count} for cluster {cluster_arn}")

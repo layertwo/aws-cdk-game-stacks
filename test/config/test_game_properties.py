@@ -1,6 +1,6 @@
 import pytest
 
-from lib.config import GamePort, GameProperties, PortType, ServiceType
+from lib.config import GameProperties
 
 BASE_KWARGS = dict(
     name="TestGame",

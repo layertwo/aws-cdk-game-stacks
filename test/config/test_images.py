@@ -1,7 +1,5 @@
 import re
 
-import pytest
-
 from lib.config.images import MINECRAFT_IMAGE, TRAEFIK_IMAGE
 
 GHCR_PREFIX = "ghcr.io/"

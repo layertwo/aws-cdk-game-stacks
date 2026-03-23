@@ -1,12 +1,6 @@
-import sys
-from pathlib import Path
-
 import pytest
 
 from lib.config import GamePort, GameProperties, PortType, ServiceType
-
-# Add lambda directory to sys.path so tests can import lambda functions
-sys.path.insert(0, str(Path(__file__).parent.parent / "lambda"))
 
 
 @pytest.fixture

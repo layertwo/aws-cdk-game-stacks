@@ -18,7 +18,9 @@ def handler(event, context):
     if status == "start":
         desired_capacity = 1
 
-    client = boto3.client("autoscaling")
+    session = boto3.Session()
+    client = session.client("autoscaling")
+
     client.update_auto_scaling_group(
         AutoScalingGroupName=asg,
         DesiredCapacity=desired_capacity,

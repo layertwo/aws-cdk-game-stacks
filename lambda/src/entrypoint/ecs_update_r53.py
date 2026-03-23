@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Any, Dict, List
 
-from boto3.session import Session
+import boto3
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,7 +14,7 @@ JsonListDict = List[JsonDict]
 
 def handler(event, context) -> None:
     """Update DNS for ECS Container"""
-    session = Session()
+    session = boto3.Session()
     hostname = os.environ["HOSTNAME"]
     hosted_zone = os.environ["HOSTED_ZONE"]
 
@@ -55,14 +55,14 @@ def handler(event, context) -> None:
         logger.error(f"unable to set IP for {fqdn}. No interfaces found.")
 
 
-def get_interfaces_from_instance_id(session: Session, instance_id: str) -> Dict[str, Any]:
+def get_interfaces_from_instance_id(session: boto3.Session, instance_id: str) -> Dict[str, Any]:
     """Get interfaces from Instance ID"""
     client = session.client("ec2")
     response = client.describe_instances(InstanceIds=[instance_id])
     return response["Reservations"][-1]["Instances"][-1]["NetworkInterfaces"]
 
 
-def get_interfaces_from_eni(session: Session, eni: str) -> Dict[str, Any]:
+def get_interfaces_from_eni(session: boto3.Session, eni: str) -> Dict[str, Any]:
     """For an ENI find the NetworkInterfaces assocations"""
     client = session.client("ec2")
     response = client.describe_network_interfaces(
@@ -77,7 +77,9 @@ def get_public_ip_from_interfaces(interfaces: JsonListDict) -> str:
         return n["Association"]["PublicIp"]
 
 
-def get_instance_id_from_container(session: Session, cluster: str, container_instance: str) -> str:
+def get_instance_id_from_container(
+    session: boto3.Session, cluster: str, container_instance: str
+) -> str:
     """Get Instance ID from container instance"""
     client = session.client("ecs")
     response = client.describe_container_instances(
@@ -96,14 +98,14 @@ def get_eni_id(attachments: List) -> str:
     return ""
 
 
-def get_hosted_zone_domain(session: Session, hosted_zone: str) -> str:
+def get_hosted_zone_domain(session: boto3.Session, hosted_zone: str) -> str:
     """Get hosted zone name"""
     client = session.client("route53")
     response = client.get_hosted_zone(Id=hosted_zone)
     return response["HostedZone"]["Name"]
 
 
-def update_dns_with_ip(session: Session, hosted_zone: str, fqdn: str, ip: str):
+def update_dns_with_ip(session: boto3.Session, hosted_zone: str, fqdn: str, ip: str):
     """Update A record to IP for FQDN"""
     client = session.client("route53")
     try:
