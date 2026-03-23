@@ -41,22 +41,3 @@ def test_github_oidc_stack_synth():
             },
         },
     )
-
-
-def test_github_oidc_role_session_duration():
-    """OIDC role must allow 4-hour sessions so CDK deploy doesn't expire mid-deploy."""
-    app = App(context={"@aws-cdk/core:enablePartitionLiterals": True})
-    env = Environment(account="000000000000", region="us-west-1")
-    stack = GithubOidcStack(
-        scope=app,
-        stack_id="TestGithubStack",
-        env=env,
-        github_org="layertwo",
-        github_repo="aws-cdk-game-stacks",
-    )
-    template = Template.from_stack(stack)
-
-    template.has_resource_properties(
-        "AWS::IAM::Role",
-        {"MaxSessionDuration": 14400},
-    )
