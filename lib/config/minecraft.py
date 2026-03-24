@@ -3,7 +3,7 @@ from lib.config.images import MINECRAFT_IMAGE
 
 EMAIL = "aws+minecraft@layertwo.dev"
 
-MC_VERSION = "1.21.1"
+MC_VERSION = "1.21.11"
 ESSENTIALS_VER = "2.21.2"
 VOXEL_SNIPER_VER = "8.14.0"
 MV_CORE = "5.5.3"
