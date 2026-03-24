@@ -9,7 +9,7 @@ VOXEL_SNIPER_VER = "8.14.0"
 MV_CORE = "5.5.3"
 MV_INV = "5.3.2"
 
-MODS = [
+MODS: list[str] = [
     # Essentials
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsX-{ESSENTIALS_VER}.jar",
     f"https://github.com/EssentialsX/Essentials/releases/download/{ESSENTIALS_VER}/EssentialsXChat-{ESSENTIALS_VER}.jar",
@@ -24,7 +24,7 @@ MODS = [
     f"https://github.com/Multiverse/Multiverse-Core/releases/download/{MV_CORE}/multiverse-core-{MV_CORE}.jar",
     f"https://github.com/Multiverse/Multiverse-Inventories/releases/download/{MV_INV}/multiverse-inventories-{MV_INV}.jar",
     # Permissions
-    "https://download.luckperms.net/1626/bukkit/loader/LuckPerms-Bukkit-5.5.38.jar"
+    "https://download.luckperms.net/1626/bukkit/loader/LuckPerms-Bukkit-5.5.38.jar",
     "https://mediafilez.forgecdn.net/files/3007/470/Vault.jar",
     # Transportation
     "https://ci.mg-dev.eu/job/TrainCarts/1686/artifact/build/TrainCarts-1.21.11-v2-1686.jar",
