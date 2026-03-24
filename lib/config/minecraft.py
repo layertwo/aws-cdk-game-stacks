@@ -33,7 +33,7 @@ MODS = [
     # "https://cdn.modrinth.com/data/YMXhf1UJ/versions/Aziw81Ii/Pl3xMap-1.20.1-469.jar",
     "https://github.com/DecentSoftware-eu/DecentHolograms/releases/download/2.9.9/DecentHolograms-2.9.9.jar",
     # Monitoring - AWS
-    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.2.0/CloudWatch-1.2.0.jar",
+    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.3.0/CloudWatch-1.3.0.jar",
 ]
 
 MAX_MEMORY = 6144
