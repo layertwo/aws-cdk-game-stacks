@@ -10,6 +10,7 @@ This project provides reusable CDK stacks for deploying game servers (currently 
 - **Persistent Storage**: EFS with automated backups and lifecycle policies
 - **Automated DNS**: Lambda-based Route53 updates when servers start
 - **Scheduled Operations**: Optional auto-start/stop for cost savings
+- **On-Demand Webhook**: Lambda Function URL to start/stop servers via HTTP
 - **Extensible Architecture**: Base `GameStack` class for easy multi-game support
 - **CI/CD Ready**: GitHub OIDC integration for secure deployments
 
@@ -201,6 +202,45 @@ cdk list
 - **CloudWatch Logs**: Centralized logging for Lambda and ECS
 - **ECS Task Events**: Automated DNS updates on task state changes
 - **Auto Scaling Metrics**: Track capacity and spot interruptions
+
+## On-Demand Webhook
+
+The stack exposes a Lambda Function URL that lets you start or stop the server on demand without AWS console access.
+
+### Setup
+
+Store a secret token in SSM (first time only):
+
+```bash
+aws ssm put-parameter \
+  --name /minecraft/webhook-token \
+  --type SecureString \
+  --value <your-secret-token>
+```
+
+### Usage
+
+**Start the server:**
+
+```bash
+curl -X POST \
+  -H "x-webhook-token: <your-secret-token>" \
+  -H "Content-Type: application/json" \
+  <lambda-function-url> \
+  -d '{"action":"start"}'
+```
+
+**Stop the server:**
+
+```bash
+curl -X POST \
+  -H "x-webhook-token: <your-secret-token>" \
+  -H "Content-Type: application/json" \
+  <lambda-function-url> \
+  -d '{"action":"stop"}'
+```
+
+The Lambda Function URL is output by CDK after deployment. Successful responses return `{"status": "ok", "desired_count": 1}` (start) or `{"status": "ok", "desired_count": 0}` (stop).
 
 ## Troubleshooting
 
