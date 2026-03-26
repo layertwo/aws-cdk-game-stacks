@@ -6,6 +6,7 @@ from aws_cdk import App, Environment
 from lib.config.minecraft import MINECRAFT_PROPS
 from lib.stacks.github_oidc_stack import GithubOidcStack
 from lib.stacks.minecraft_stack import MinecraftStack
+from lib.stacks.monitoring_stack import MinecraftMonitoringStack
 
 app = App()
 env = Environment(
@@ -21,4 +22,5 @@ github_oidc_stack = GithubOidcStack(
     github_repo="aws-cdk-game-stacks",
 )
 minecraft_stack = MinecraftStack(scope=app, props=MINECRAFT_PROPS, env=env)
+MinecraftMonitoringStack(scope=app, minecraft_stack=minecraft_stack, env=env)
 app.synth()
