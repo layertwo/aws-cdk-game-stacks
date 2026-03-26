@@ -1,5 +1,3 @@
-from typing import cast
-
 import aws_cdk.aws_cloudwatch as cloudwatch
 import aws_cdk.aws_ecs as ecs
 from aws_cdk import Duration, Stack
@@ -7,8 +5,8 @@ from cdk_monitoring_constructs import (
     CustomMetricGroup,
     CustomMonitoringProps,
     DefaultDashboardFactory,
-    FargateServiceMonitoringProps,
     MonitoringFacade,
+    SimpleFargateServiceMonitoringProps,
 )
 from constructs import Construct
 
@@ -54,8 +52,8 @@ class MinecraftMonitoringStack(Stack):
 
         # ── Section 1: ECS Infrastructure ────────────────────────────────
         facade.add_large_header("ECS Infrastructure")
-        facade.monitor_fargate_service(
-            FargateServiceMonitoringProps(
+        facade.monitor_simple_fargate_service(
+            SimpleFargateServiceMonitoringProps(
                 fargate_service=cast(ecs.FargateService, minecraft_stack.service),
             )
         )
