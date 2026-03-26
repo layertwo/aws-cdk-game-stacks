@@ -1,3 +1,5 @@
+from typing import cast
+
 import aws_cdk.aws_cloudwatch as cloudwatch
 import aws_cdk.aws_ecs as ecs
 from aws_cdk import Duration, Stack
