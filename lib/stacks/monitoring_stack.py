@@ -4,6 +4,7 @@ import aws_cdk.aws_cloudwatch as cloudwatch
 import aws_cdk.aws_ecs as ecs
 from aws_cdk import Duration, Stack
 from cdk_monitoring_constructs import (
+    AlarmFactoryDefaults,
     CustomMetricGroup,
     DefaultDashboardFactory,
     MonitoringFacade,
@@ -43,6 +44,10 @@ class MinecraftMonitoringStack(Stack):
         facade = MonitoringFacade(
             self,
             "MonitoringFacade",
+            alarm_factory_defaults=AlarmFactoryDefaults(
+                actions_enabled=False,
+                alarm_name_prefix="Minecraft",
+            ),
             dashboard_factory=DefaultDashboardFactory(
                 self,
                 "DashboardFactory",
