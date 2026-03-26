@@ -1,3 +1,4 @@
+# pragma: exclude file
 from lib.config import GamePort, GameProperties, PortType, ServiceType
 from lib.config.images import MINECRAFT_IMAGE
 
@@ -33,7 +34,7 @@ MODS: list[str] = [
     # "https://cdn.modrinth.com/data/YMXhf1UJ/versions/Aziw81Ii/Pl3xMap-1.20.1-469.jar",
     "https://github.com/DecentSoftware-eu/DecentHolograms/releases/download/2.9.9/DecentHolograms-2.9.9.jar",
     # Monitoring - AWS
-    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.3.0/CloudWatch-1.3.0.jar",
+    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.4.0/CloudWatch-1.4.0.jar",
 ]
 
 MAX_MEMORY = 6144
@@ -61,6 +62,7 @@ MINECRAFT_PROPS = GameProperties(
         "ENABLE_ROLLING_LOGS": "TRUE",
         "USE_AIKAR_FLAGS": "TRUE",
         "USE_FLARE_FLAGS": "FALSE",
+        "SPIGOT_CLOUDWATCH_SERVER": "minecraft",
     },
     auto_start=False,
     start_time="0 23 * * FRI",  # Friday 3PM PST
@@ -71,8 +73,5 @@ MINECRAFT_PROPS = GameProperties(
     instance_connect=False,
     max_mib_memory=MAX_MEMORY,
     webhook_enabled=True,
-    idle_shutdown_minutes=20,
-    # Confirm these values in CloudWatch > Metrics after first run:
-    # cloudwatch_metric_namespace="Minecraft",
-    # cloudwatch_player_count_metric="players_online",
+    idle_shutdown_minutes=10,
 )

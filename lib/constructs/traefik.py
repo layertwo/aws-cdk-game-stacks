@@ -1,3 +1,4 @@
+# pragma: exclude file
 from functools import cached_property
 
 from aws_cdk import Aws

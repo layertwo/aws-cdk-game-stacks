@@ -202,6 +202,25 @@ tomlkit = ["tomlkit (>=0.11.8)"]
 ujson = ["ujson (>=5.10.0)"]
 
 [[package]]
+name = "cdk-monitoring-constructs"
+version = "9.22.1"
+description = "cdk-monitoring-constructs"
+optional = false
+python-versions = "~=3.9"
+groups = ["main"]
+files = [
+    {file = "cdk_monitoring_constructs-9.22.1-py3-none-any.whl", hash = "sha256:403b5bb2c22c2b4dca5e3f23531d30e787cb831d8cc8f8df97ad5b6914c3c12e"},
+    {file = "cdk_monitoring_constructs-9.22.1.tar.gz", hash = "sha256:11cb26960fc3f1ece9afe3f7c9809dbb01f3515b1148be509de4355eb48cbc59"},
+]
+
+[package.dependencies]
+aws-cdk-lib = ">=2.160.0,<3.0.0"
+constructs = ">=10.0.5,<11.0.0"
+jsii = ">=1.127.0,<2.0.0"
+publication = ">=0.0.3"
+typeguard = "2.13.3"
+
+[[package]]
 name = "click"
 version = "8.3.1"
 description = "Composable command line interface toolkit"
@@ -822,4 +841,4 @@ typeguard = ">=2.13.3,<4.3.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "1bff7f6e53c9d1a332d886f77e4327345739412049a4fb38aa2550994a64fba5"
+content-hash = "be3847187c37d7139a84d08bfcdaeb4cc19eba0702ab20a3f09071aa8ba40144"
