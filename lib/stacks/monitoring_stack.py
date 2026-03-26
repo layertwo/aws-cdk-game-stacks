@@ -54,6 +54,7 @@ class MinecraftMonitoringStack(Stack):
         facade.add_large_header("ECS Infrastructure")
         facade.monitor_simple_fargate_service(
             fargate_service=cast(ecs.FargateService, minecraft_stack.service),
+            human_readable_name="Minecraft ECS Service",
         )
 
         # ── Section 2: Gameplay ───────────────────────────────────────────
