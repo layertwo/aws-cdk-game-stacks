@@ -117,13 +117,14 @@ def test_watchdog_alarm_created(watchdog_game_properties):
         "AWS::CloudWatch::Alarm",
         {
             "Namespace": "Minecraft",
-            "MetricName": "players_online",
+            "MetricName": "OnlinePlayers",
             "Statistic": "Maximum",
             "Period": 300,
             "EvaluationPeriods": 4,
             "DatapointsToAlarm": 4,
             "Threshold": 0,
             "TreatMissingData": "breaching",
+            "Dimensions": Match.array_with([{"Name": "Server", "Value": "testgame"}]),
         },
     )
 

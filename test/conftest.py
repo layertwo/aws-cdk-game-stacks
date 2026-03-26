@@ -71,6 +71,6 @@ def watchdog_game_properties() -> GameProperties:
         domain_name="example.com",
         hosted_zone_id="Z00000000000000000000",
         cloudwatch_metric_namespace="Minecraft",
-        cloudwatch_player_count_metric="players_online",
+        cloudwatch_player_count_metric="OnlinePlayers",
         idle_shutdown_minutes=20,
     )
