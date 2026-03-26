@@ -1,7 +1,7 @@
 from typing import Mapping
 
-import aws_cdk.aws_cloudwatch as cw
 from aws_cdk import Duration
+from aws_cdk import aws_cloudwatch as cw
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_logs as logs
@@ -12,7 +12,6 @@ from cdk_monitoring_constructs import (
     CustomMetricGroup,
     CustomMetricWithAlarm,
     CustomThreshold,
-    DefaultDashboardFactory,
     MonitoringFacade,
     SnsAlarmActionStrategy,
 )
@@ -121,14 +120,14 @@ class MinecraftStack(GameStack):
 
         facade.add_large_header("Gameplay")
         facade.monitor_custom(
-            alarm_friendly_name="Players & Server Health",
+            alarm_friendly_name="Players",
             metric_groups=[
                 CustomMetricGroup(
                     title="Player Count",
                     metrics=[
                         CustomMetricWithAlarm(
                             metric=self._mc_metric("OnlinePlayers"),
-                            alarm_friendly_name="Online-Player-Count-0",
+                            alarm_friendly_name="Online-Count-0",
                             add_alarm={
                                 "Warning": CustomThreshold(
                                     threshold=0,
@@ -145,33 +144,6 @@ class MinecraftStack(GameStack):
                     ],
                 ),
                 CustomMetricGroup(
-                    title="Server Health",
-                    metrics=[
-                        self._mc_metric("TicksPerSecond"),
-                        self._mc_metric("MaxTickTime"),
-                        self._mc_metric("ChunksLoaded"),
-                    ],
-                ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="World Activity",
-            metric_groups=[
-                CustomMetricGroup(
-                    title="World Activity",
-                    metrics=[
-                        self._mc_metric("CreaturesSpawned"),
-                        self._mc_metric("EntityDeaths"),
-                        self._mc_metric("ItemsSpawned"),
-                        self._mc_metric("ItemsDespawned"),
-                    ],
-                ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="Player Activity",
-            metric_groups=[
-                CustomMetricGroup(
                     title="Player Activity",
                     metrics=[
                         self._mc_metric("PlayerInteractions"),
@@ -180,13 +152,8 @@ class MinecraftStack(GameStack):
                         self._mc_metric("ProjectilesLaunched"),
                     ],
                 ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="Inventory Activity",
-            metric_groups=[
                 CustomMetricGroup(
-                    title="Inventory Activity",
+                    title="Inventory",
                     metrics=[
                         self._mc_metric("InventoriesOpened"),
                         self._mc_metric("InventoriesClosed"),
@@ -197,14 +164,35 @@ class MinecraftStack(GameStack):
             ],
         )
         facade.monitor_custom(
-            alarm_friendly_name="World Events",
+            alarm_friendly_name="World",
             metric_groups=[
                 CustomMetricGroup(
-                    title="World Events",
+                    title="Ticks",
                     metrics=[
+                        self._mc_metric("TicksPerSecond"),
+                        self._mc_metric("MaxTickTime"),
+                    ],
+                ),
+                CustomMetricGroup(
+                    title="Chunks",
+                    metrics=[
+                        self._mc_metric("ChunksLoaded"),
                         self._mc_metric("ChunksPopulated"),
                         self._mc_metric("StructuresGrown"),
-                        self._mc_metric("TradesSelected"),
+                    ],
+                ),
+                CustomMetricGroup(
+                    title="Entities",
+                    metrics=[
+                        self._mc_metric("CreaturesSpawned"),
+                        self._mc_metric("EntityDeaths"),
+                    ],
+                ),
+                CustomMetricGroup(
+                    title="Items",
+                    metrics=[
+                        self._mc_metric("ItemsSpawned"),
+                        self._mc_metric("ItemsDespawned"),
                     ],
                 ),
             ],
@@ -212,7 +200,7 @@ class MinecraftStack(GameStack):
 
         facade.add_large_header("JVM Health")
         facade.monitor_custom(
-            alarm_friendly_name="Heap Memory",
+            alarm_friendly_name="JVM",
             metric_groups=[
                 CustomMetricGroup(
                     title="Heap Memory",
@@ -223,11 +211,6 @@ class MinecraftStack(GameStack):
                         self._java_metric("HeapSize"),
                     ],
                 ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="CPU & Threads",
-            metric_groups=[
                 CustomMetricGroup(
                     title="CPU",
                     metrics=[
@@ -243,29 +226,11 @@ class MinecraftStack(GameStack):
                         self._java_metric("MaxFileDescriptors"),
                     ],
                 ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="Garbage Collection",
-            metric_groups=[
                 CustomMetricGroup(
                     title="Garbage Collection",
                     metrics=[
                         self._java_metric("GarbageCollections"),
                         self._java_metric("GarbageCollectionTime"),
-                    ],
-                ),
-            ],
-        )
-        facade.monitor_custom(
-            alarm_friendly_name="Physical Memory",
-            metric_groups=[
-                CustomMetricGroup(
-                    title="Physical Memory",
-                    metrics=[
-                        self._java_metric("TotalPhysicalMemorySize"),
-                        self._java_metric("UsedPhysicalMemorySize"),
-                        self._java_metric("FreePhysicalMemorySize"),
                     ],
                 ),
             ],
