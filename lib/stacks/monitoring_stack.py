@@ -59,13 +59,13 @@ class MinecraftMonitoringStack(Stack):
         facade.add_large_header("ECS Infrastructure")
         facade.monitor_simple_fargate_service(
             fargate_service=cast(ecs.FargateService, minecraft_stack.service),
-            human_readable_name="Minecraft ECS Service",
+            alarm_friendly_name="Minecraft ECS Service",
         )
 
         # ── Section 2: Gameplay ───────────────────────────────────────────
         facade.add_large_header("Gameplay")
         facade.monitor_custom(
-            human_readable_name="Players & Server Health",
+            alarm_friendly_name="Players & Server Health",
             metric_groups=[
                 CustomMetricGroup(
                     title="Players & Server Health",
@@ -79,7 +79,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="World Activity",
+            alarm_friendly_name="World Activity",
             metric_groups=[
                 CustomMetricGroup(
                     title="World Activity",
@@ -93,7 +93,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="Player Activity",
+            alarm_friendly_name="Player Activity",
             metric_groups=[
                 CustomMetricGroup(
                     title="Player Activity",
@@ -107,7 +107,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="Inventory Activity",
+            alarm_friendly_name="Inventory Activity",
             metric_groups=[
                 CustomMetricGroup(
                     title="Inventory Activity",
@@ -121,7 +121,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="World Events",
+            alarm_friendly_name="World Events",
             metric_groups=[
                 CustomMetricGroup(
                     title="World Events",
@@ -137,7 +137,7 @@ class MinecraftMonitoringStack(Stack):
         # ── Section 3: JVM Health ─────────────────────────────────────────
         facade.add_large_header("JVM Health")
         facade.monitor_custom(
-            human_readable_name="Heap Memory",
+            alarm_friendly_name="Heap Memory",
             metric_groups=[
                 CustomMetricGroup(
                     title="Heap Memory",
@@ -151,7 +151,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="CPU & Threads",
+            alarm_friendly_name="CPU & Threads",
             metric_groups=[
                 CustomMetricGroup(
                     title="CPU & Threads",
@@ -166,7 +166,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="Garbage Collection",
+            alarm_friendly_name="Garbage Collection",
             metric_groups=[
                 CustomMetricGroup(
                     title="Garbage Collection",
@@ -178,7 +178,7 @@ class MinecraftMonitoringStack(Stack):
             ],
         )
         facade.monitor_custom(
-            human_readable_name="Physical Memory",
+            alarm_friendly_name="Physical Memory",
             metric_groups=[
                 CustomMetricGroup(
                     title="Physical Memory",
