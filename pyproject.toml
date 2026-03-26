@@ -17,6 +17,7 @@ aws-cdk-lib = "^2.244.0"
 constructs = "^10.5.1"
 boto3 = "^1.42.73"
 uv-python-lambda = "^0.0.7"
+cdk-monitoring-constructs = "^9.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
