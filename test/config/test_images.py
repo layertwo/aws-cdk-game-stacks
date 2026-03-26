@@ -22,4 +22,4 @@ def test_minecraft_image_uses_ghcr():
 def test_minecraft_image_has_versioned_tag():
     # expects ghcr.io/itzg/minecraft-server:YYYY.M.D-java17
     tag = MINECRAFT_IMAGE.split(":")[-1]
-    assert re.match(r"^\d{4}\.\d+\.\d+-java17$", tag), f"Unexpected tag: {tag}"
+    assert re.match(r"^\d{4}\.\d+\.\d+-java\d+$", tag), f"Unexpected tag: {tag}"

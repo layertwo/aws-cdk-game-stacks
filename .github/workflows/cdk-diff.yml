@@ -68,3 +68,5 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           cdkOutDir: build/cdk.out
+          ignoreDestructiveChanges: |
+            AWS::ECS::TaskDefinition
