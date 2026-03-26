@@ -8,7 +8,6 @@ from cdk_monitoring_constructs import (
     CustomMonitoringProps,
     DefaultDashboardFactory,
     MonitoringFacade,
-    SimpleFargateServiceMonitoringProps,
 )
 from constructs import Construct
 
@@ -55,9 +54,7 @@ class MinecraftMonitoringStack(Stack):
         # ── Section 1: ECS Infrastructure ────────────────────────────────
         facade.add_large_header("ECS Infrastructure")
         facade.monitor_simple_fargate_service(
-            SimpleFargateServiceMonitoringProps(
-                fargate_service=cast(ecs.FargateService, minecraft_stack.service),
-            )
+            fargate_service=cast(ecs.FargateService, minecraft_stack.service),
         )
 
         # ── Section 2: Gameplay ───────────────────────────────────────────
