@@ -33,6 +33,8 @@ from lib.config import GameProperties, PortType, ServiceType
 
 
 class GameStack(Stack):
+    props: GameProperties
+    service: ecs.BaseService
     def __init__(self, scope: Construct, props: GameProperties, **kwargs) -> None:
         """Instantiate game stack"""
         super().__init__(scope, f"{props.name.capitalize()}Stack", **kwargs)
@@ -574,6 +576,7 @@ class GameStack(Stack):
         metric = cloudwatch.Metric(
             namespace=self.props.cloudwatch_metric_namespace,
             metric_name=self.props.cloudwatch_player_count_metric,
+            dimensions_map={"Server": self.props.name.lower()},
             statistic="Maximum",
             period=Duration.minutes(5),
         )
