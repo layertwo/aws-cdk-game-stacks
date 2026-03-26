@@ -2,9 +2,9 @@ import pytest
 from aws_cdk import App, Environment
 from aws_cdk.assertions import Template
 
+from lib.config.minecraft import MINECRAFT_PROPS
 from lib.stacks.minecraft_stack import MinecraftStack
 from lib.stacks.monitoring_stack import MinecraftMonitoringStack
-from lib.config.minecraft import MINECRAFT_PROPS
 
 
 @pytest.fixture
