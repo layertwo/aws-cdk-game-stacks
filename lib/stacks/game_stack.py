@@ -35,6 +35,7 @@ from lib.config import GameProperties, PortType, ServiceType
 class GameStack(Stack):
     props: GameProperties
     service: ecs.BaseService
+
     def __init__(self, scope: Construct, props: GameProperties, **kwargs) -> None:
         """Instantiate game stack"""
         super().__init__(scope, f"{props.name.capitalize()}Stack", **kwargs)
