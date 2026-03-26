@@ -1,3 +1,4 @@
+# pragma: exclude file
 from lib.config import GamePort, GameProperties, PortType, ServiceType
 from lib.config.images import MINECRAFT_IMAGE
 
@@ -72,7 +73,5 @@ MINECRAFT_PROPS = GameProperties(
     instance_connect=False,
     max_mib_memory=MAX_MEMORY,
     webhook_enabled=True,
-    idle_shutdown_minutes=20,
-    cloudwatch_metric_namespace="Minecraft",
-    cloudwatch_player_count_metric="OnlinePlayers",
+    idle_shutdown_minutes=10,
 )

@@ -40,18 +40,3 @@ class GameProperties:
     max_mib_memory: int = 3072
     webhook_enabled: bool = False
     idle_shutdown_minutes: int = 20
-    cloudwatch_metric_namespace: Optional[str] = None
-    cloudwatch_player_count_metric: Optional[str] = None
-
-    def __post_init__(self) -> None:
-        cw_fields = (self.cloudwatch_metric_namespace, self.cloudwatch_player_count_metric)
-        if any(cw_fields) and not all(cw_fields):
-            raise ValueError(
-                "cloudwatch_metric_namespace and cloudwatch_player_count_metric "
-                "must both be set or both be None"
-            )
-        if self.idle_shutdown_minutes <= 0 or self.idle_shutdown_minutes % 5 != 0:
-            raise ValueError(
-                f"idle_shutdown_minutes must be a positive multiple of 5, "
-                f"got {self.idle_shutdown_minutes}"
-            )

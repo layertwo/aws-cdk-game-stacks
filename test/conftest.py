@@ -26,7 +26,7 @@ def game_properties() -> GameProperties:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def fargate_game_properties() -> GameProperties:
     return GameProperties(
         name="TestGame",
@@ -44,7 +44,7 @@ def fargate_game_properties() -> GameProperties:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def webhook_game_properties() -> GameProperties:
     return GameProperties(
         name="TestGame",
@@ -56,21 +56,5 @@ def webhook_game_properties() -> GameProperties:
         domain_name="example.com",
         hosted_zone_id="Z00000000000000000000",
         webhook_enabled=True,
-    )
-
-
-@pytest.fixture
-def watchdog_game_properties() -> GameProperties:
-    return GameProperties(
-        name="TestGame",
-        container_image="foobar-container/latest",
-        container_path="/data",
-        service_type=ServiceType.FARGATE,
-        ports=[GamePort(port_type=PortType.TCP, number=80)],
-        environment={"FOO": "BAR"},
-        domain_name="example.com",
-        hosted_zone_id="Z00000000000000000000",
-        cloudwatch_metric_namespace="Minecraft",
-        cloudwatch_player_count_metric="OnlinePlayers",
         idle_shutdown_minutes=20,
     )

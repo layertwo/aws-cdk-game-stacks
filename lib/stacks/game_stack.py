@@ -5,8 +5,6 @@ from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
-from aws_cdk import aws_cloudwatch as cloudwatch
-from aws_cdk import aws_cloudwatch_actions as cw_actions
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
@@ -16,8 +14,6 @@ from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_route53 as route53
-from aws_cdk import aws_sns as sns
-from aws_cdk import aws_sns_subscriptions as sns_subscriptions
 from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 
@@ -33,8 +29,6 @@ from lib.config import GameProperties, PortType, ServiceType
 
 
 class GameStack(Stack):
-    props: GameProperties
-    service: ecs.BaseService
 
     def __init__(self, scope: Construct, props: GameProperties, **kwargs) -> None:
         """Instantiate game stack"""
@@ -45,9 +39,6 @@ class GameStack(Stack):
 
         if self.props.webhook_enabled:
             self.create_webhook_lambda()
-
-        if self.props.cloudwatch_metric_namespace and self.props.cloudwatch_player_count_metric:
-            self.create_idle_watchdog_alarm()
 
         if self.props.auto_start and self.props.service_type == ServiceType.EC2:
             self._create_asg_scheduled_actions()
@@ -569,31 +560,3 @@ class GameStack(Stack):
                 retention=logs.RetentionDays.ONE_WEEK,
             ),
         )
-
-    def create_idle_watchdog_alarm(self) -> None:
-        """CloudWatch Alarm that stops the server after N idle minutes"""
-        evaluation_periods = self.props.idle_shutdown_minutes // 5
-
-        metric = cloudwatch.Metric(
-            namespace=self.props.cloudwatch_metric_namespace,
-            metric_name=self.props.cloudwatch_player_count_metric,
-            dimensions_map={"Server": self.props.name.lower()},
-            statistic="Maximum",
-            period=Duration.minutes(5),
-        )
-
-        alarm = cloudwatch.Alarm(
-            self,
-            self.qualify_name("IdleWatchdogAlarm"),
-            alarm_name=self.qualify_name("IdleWatchdogAlarm"),
-            metric=metric,
-            threshold=0,
-            comparison_operator=cloudwatch.ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
-            evaluation_periods=evaluation_periods,
-            datapoints_to_alarm=evaluation_periods,
-            treat_missing_data=cloudwatch.TreatMissingData.BREACHING,
-        )
-
-        topic = sns.Topic(self, self.qualify_name("WatchdogTopic"))
-        topic.add_subscription(sns_subscriptions.LambdaSubscription(self.task_count_lambda))
-        alarm.add_alarm_action(cw_actions.SnsAction(topic))

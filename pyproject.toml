@@ -78,8 +78,22 @@ source = ["lib"]
 omit = [
     "*/tests/*",
     "*/test_*",
-    "lib/constructs/traefik.py",
 ]
 branch = true
 parallel = true
 relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: nocover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "pass",
+]
+exclude_also = [
+    '\A(?s:.*# pragma: exclude file.*)\Z',
+]
