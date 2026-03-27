@@ -80,21 +80,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Synthesize
-        run: poetry run cdk synth
-
-      - name: Read desired counts from SSM
-        run: |
-          MINECRAFT_COUNT=$(aws ssm get-parameter \
-            --name /minecraft/desired-count \
-            --query 'Parameter.Value' \
-            --output text 2>/dev/null || echo "0")
-          [[ "$MINECRAFT_COUNT" =~ ^[01]$ ]] || MINECRAFT_COUNT=0
-          echo "MINECRAFT_COUNT=$MINECRAFT_COUNT" >> "$GITHUB_ENV"
+        run: poetry run cdk context --clear && poetry run cdk synth
 
       - name: CDK Deploy
-        run: |
-          poetry run cdk deploy --all --require-approval never --outputs-file outputs.json \
-            --parameters MinecraftStack:MinecraftDesiredCount="$MINECRAFT_COUNT"
+        run: poetry run cdk deploy --all --require-approval never --outputs-file outputs.json
 
       - name: Display deployment outputs
         run: |

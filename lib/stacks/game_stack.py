@@ -1,7 +1,7 @@
 from functools import cached_property
 
 import uv_python_lambda
-from aws_cdk import CfnParameter, Duration, Stack, Tags
+from aws_cdk import Duration, Stack, Tags
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -15,7 +15,6 @@ from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_route53 as route53
 from aws_cdk import aws_ssm as ssm
-from aws_cdk import custom_resources as cr
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
@@ -263,39 +262,11 @@ class GameStack(Stack):
         return service
 
     def _setup_desired_count_ssm(self, service: ecs.FargateService) -> None:
-        """Seed SSM with desired-count=0 on first deploy, then wire a CfnParameter so
-        CloudFormation reads the live SSM value on every subsequent deployment instead
-        of resetting DesiredCount to 0."""
-        cr.AwsCustomResource(
-            self,
-            self.qualify_name("SeedDesiredCount"),
-            on_create=cr.AwsSdkCall(
-                service="SSM",
-                action="putParameter",
-                parameters={
-                    "Name": self._desired_count_ssm_path,
-                    "Value": "0",
-                    "Type": "String",
-                },
-                physical_resource_id=cr.PhysicalResourceId.of(self._desired_count_ssm_path),
-                ignore_error_codes_matching="ParameterAlreadyExists",
-            ),
-            policy=cr.AwsCustomResourcePolicy.from_statements(
-                [ssm_put_parameter_policy(resources=[self._desired_count_ssm_arn])]
-            ),
-        )
-
-        desired_count_param = CfnParameter(
-            self,
-            self.qualify_name("DesiredCount"),
-            type="Number",
-            default="0",
-            min_value=0,
-            max_value=1,
-            description=f"Current desired task count for {self.props.name} — populated at deploy time from SSM to preserve running state",
-        )
+        """Read the desired count from SSM at synth time and embed it directly in the
+        CloudFormation template, so deployments never reset a running server to 0."""
+        desired_count = ssm.StringParameter.value_from_lookup(self, self._desired_count_ssm_path)
         service.node.default_child.add_property_override(
-            "DesiredCount", desired_count_param.value_as_number
+            "DesiredCount", int(desired_count) if desired_count.isdigit() else 0
         )
 
     def _create_container(self) -> ecs.ContainerDefinition:
