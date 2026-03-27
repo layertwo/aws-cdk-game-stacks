@@ -34,10 +34,10 @@ MODS: list[str] = [
     # "https://cdn.modrinth.com/data/YMXhf1UJ/versions/Aziw81Ii/Pl3xMap-1.20.1-469.jar",
     "https://github.com/DecentSoftware-eu/DecentHolograms/releases/download/2.9.9/DecentHolograms-2.9.9.jar",
     # Monitoring - AWS
-    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.4.1/CloudWatch-1.4.1.jar",
+    "https://github.com/layertwo/Spigot-Cloudwatch/releases/download/v1.5.0/CloudWatch-1.5.0.jar",
 ]
 
-MAX_MEMORY = 6144
+MAX_MEMORY = 8192
 MINECRAFT_PROPS = GameProperties(
     name="Minecraft",
     container_image=MINECRAFT_IMAGE,
