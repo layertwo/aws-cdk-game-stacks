@@ -2,7 +2,6 @@ from functools import cached_property
 
 import uv_python_lambda
 from aws_cdk import CfnParameter, Duration, Stack, Tags
-from aws_cdk import custom_resources as cr
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -16,6 +15,7 @@ from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_route53 as route53
 from aws_cdk import aws_ssm as ssm
+from aws_cdk import custom_resources as cr
 from constructs import Construct
 
 from lib.aws_common.ec2 import create_security_group
