@@ -1,7 +1,8 @@
 from functools import cached_property
 
 import uv_python_lambda
-from aws_cdk import Duration, Stack, Tags
+from aws_cdk import CfnParameter, Duration, Stack, Tags
+from aws_cdk import custom_resources as cr
 from aws_cdk import aws_applicationautoscaling as appscaling
 from aws_cdk import aws_autoscaling as autoscaling
 from aws_cdk import aws_backup as backup
@@ -24,6 +25,7 @@ from lib.aws_common.iam import (
     ecs_cluster_update_policy,
     r53_update_policy,
     ssm_get_parameter_policy,
+    ssm_put_parameter_policy,
 )
 from lib.config import GameProperties, PortType, ServiceType
 
@@ -254,9 +256,47 @@ class GameStack(Stack):
                 ],
             )
             self.scalable_task = service.auto_scale_task_count(max_capacity=1, min_capacity=0)
+            if self.props.webhook_enabled:
+                self._setup_desired_count_ssm(service)
         else:
             service.auto_scale_task_count(max_capacity=1, min_capacity=1)
         return service
+
+    def _setup_desired_count_ssm(self, service: ecs.FargateService) -> None:
+        """Seed SSM with desired-count=0 on first deploy, then wire a CfnParameter so
+        CloudFormation reads the live SSM value on every subsequent deployment instead
+        of resetting DesiredCount to 0."""
+        cr.AwsCustomResource(
+            self,
+            self.qualify_name("SeedDesiredCount"),
+            on_create=cr.AwsSdkCall(
+                service="SSM",
+                action="putParameter",
+                parameters={
+                    "Name": self._desired_count_ssm_path,
+                    "Value": "0",
+                    "Type": "String",
+                },
+                physical_resource_id=cr.PhysicalResourceId.of(self._desired_count_ssm_path),
+                ignore_error_codes_matching="ParameterAlreadyExists",
+            ),
+            policy=cr.AwsCustomResourcePolicy.from_statements(
+                [ssm_put_parameter_policy(resources=[self._desired_count_ssm_arn])]
+            ),
+        )
+
+        desired_count_param = CfnParameter(
+            self,
+            self.qualify_name("DesiredCount"),
+            type="Number",
+            default="0",
+            min_value=0,
+            max_value=1,
+            description=f"Current desired task count for {self.props.name} — populated at deploy time from SSM to preserve running state",
+        )
+        service.node.default_child.add_property_override(
+            "DesiredCount", desired_count_param.value_as_number
+        )
 
     def _create_container(self) -> ecs.ContainerDefinition:
         container = self.task.add_container(
@@ -403,6 +443,18 @@ class GameStack(Stack):
     def fqdn(self) -> str:
         return f"{self.hostname}.{self.props.domain_name}"
 
+    @cached_property
+    def _desired_count_ssm_path(self) -> str:
+        return f"/{self.props.name.lower()}/desired-count"
+
+    @cached_property
+    def _desired_count_ssm_arn(self) -> str:
+        return Stack.of(self).format_arn(
+            service="ssm",
+            resource="parameter",
+            resource_name=f"{self.props.name.lower()}/desired-count",
+        )
+
     def create_dns_update_lambda(self) -> uv_python_lambda.PythonFunction:
         """Lambda that updates route 53 dns"""
 
@@ -495,11 +547,13 @@ class GameStack(Stack):
                 ecs_cluster_read_policy(
                     resources=[self.cluster.cluster_arn, self.service.service_arn]
                 ),
+                ssm_put_parameter_policy(resources=[self._desired_count_ssm_arn]),
             ],
             environment={
                 "ECS_CLUSTER_ARN": self.cluster.cluster_arn,
                 "ECS_SERVICE_NAME": self.service.service_name,
                 "WEBHOOK_TOKEN_SSM_PATH": ssm_token_path,
+                "DESIRED_COUNT_SSM_PATH": self._desired_count_ssm_path,
             },
             log_group=logs.LogGroup(
                 self,
