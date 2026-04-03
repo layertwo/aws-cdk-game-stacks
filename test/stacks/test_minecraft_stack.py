@@ -27,10 +27,6 @@ def test_minecraft_fargate_no_asg(fargate_template):
     fargate_template.resource_count_is("AWS::AutoScaling::AutoScalingGroup", 0)
 
 
-def test_minecraft_fargate_no_asg(fargate_template):
-    fargate_template.resource_count_is("AWS::AutoScaling::AutoScalingGroup", 0)
-
-
 def test_minecraft_fargate_single_service(fargate_template):
     fargate_template.resource_count_is("AWS::ECS::Service", 1)
 

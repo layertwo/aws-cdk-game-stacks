@@ -72,3 +72,12 @@ def ssm_get_parameter_policy(resources: List) -> iam.PolicyStatement:
         actions=["ssm:GetParameter"],
         resources=resources,
     )
+
+
+def ssm_put_parameter_policy(resources: List) -> iam.PolicyStatement:
+    """Allow writing SSM parameters"""
+    return iam.PolicyStatement(
+        effect=iam.Effect.ALLOW,
+        actions=["ssm:PutParameter"],
+        resources=resources,
+    )

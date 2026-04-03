@@ -77,4 +77,14 @@ def handler(event, context) -> dict:
         desiredCount=desired_count,
     )
 
+    desired_count_ssm_path = os.environ.get("DESIRED_COUNT_SSM_PATH")
+    if desired_count_ssm_path:
+        ssm_client.put_parameter(
+            Name=desired_count_ssm_path,
+            Value=str(desired_count),
+            Type="String",
+            Overwrite=True,
+        )
+        logger.info(f"updated {desired_count_ssm_path} to {desired_count}")
+
     return _response(200, {"status": "ok", "desired_count": desired_count})
