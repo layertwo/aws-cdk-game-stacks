@@ -6,23 +6,29 @@
     'mergeConfidence:all-badges',
     ':disableRateLimiting',
     ':semanticCommits',
-    'github>layertwo/renovate-config'
+    'github>layertwo/renovate-config',
   ],
   customManagers: [
     {
       customType: 'regex',
-      fileMatch: ['^lib/config/images\\.py$'],
-      matchStrings: [
-        '"(?<depName>[a-z0-9][a-z0-9._-]*(?:/[a-z0-9._-]+)*):(?<currentValue>[^"\\s]+)"'
+      managerFilePatterns: [
+        '/^lib/config/images\\.py$/',
       ],
-      datasourceTemplate: 'docker'
-    }
+      matchStrings: [
+        '"(?<depName>[a-z0-9][a-z0-9._-]*(?:/[a-z0-9._-]+)*):(?<currentValue>[^"\\s]+)"',
+      ],
+      datasourceTemplate: 'docker',
+    },
   ],
   packageRules: [
     {
-      matchDatasources: ['docker'],
-      matchPackageNames: ['ghcr.io/itzg/minecraft-server'],
-      versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-java17)$'
-    }
-  ]
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'ghcr.io/itzg/minecraft-server',
+      ],
+      versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-java17)$',
+    },
+  ],
 }
