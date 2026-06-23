@@ -81,7 +81,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Synthesize
-        run: uv run cdk context --clear && poetry run cdk synth
+        run: uv run cdk context --clear && uv run cdk synth
 
       - name: CDK Deploy
         run: uv run cdk deploy --all --require-approval never --outputs-file outputs.json
