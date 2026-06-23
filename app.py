@@ -3,9 +3,9 @@ import os
 
 from aws_cdk import App, Environment
 
-from lib.config.minecraft import MINECRAFT_PROPS
-from lib.stacks.github_oidc_stack import GithubOidcStack
-from lib.stacks.minecraft_stack import MinecraftStack
+from cdk.config.minecraft import MINECRAFT_PROPS
+from cdk.stacks.github_oidc_stack import GithubOidcStack
+from cdk.stacks.minecraft_stack import MinecraftStack
 
 app = App()
 env = Environment(

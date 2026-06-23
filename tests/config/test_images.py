@@ -1,6 +1,6 @@
 import re
 
-from lib.config.images import MINECRAFT_IMAGE, TRAEFIK_IMAGE
+from cdk.config.images import MINECRAFT_IMAGE, TRAEFIK_IMAGE
 
 GHCR_PREFIX = "ghcr.io/"
 

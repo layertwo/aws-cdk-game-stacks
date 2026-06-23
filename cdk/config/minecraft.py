@@ -1,6 +1,6 @@
 # pragma: exclude file
-from lib.config import GamePort, GameProperties, PortType, ServiceType
-from lib.config.images import MINECRAFT_IMAGE
+from cdk.config import GamePort, GameProperties, PortType, ServiceType
+from cdk.config.images import MINECRAFT_IMAGE
 
 EMAIL = "aws+minecraft@layertwo.dev"
 

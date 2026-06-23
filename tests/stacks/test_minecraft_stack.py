@@ -2,7 +2,7 @@ import pytest
 from aws_cdk import App, Environment
 from aws_cdk.assertions import Match, Template
 
-from lib.stacks.minecraft_stack import MinecraftStack
+from cdk.stacks.minecraft_stack import MinecraftStack
 
 
 @pytest.fixture(scope="session")

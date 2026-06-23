@@ -8,10 +8,10 @@ from aws_cdk import aws_efs as efs
 from aws_cdk import aws_logs as logs
 from constructs import Construct
 
-from lib.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy
-from lib.config import ServiceType
-from lib.config.images import TRAEFIK_IMAGE
-from lib.config.minecraft import EMAIL
+from cdk.aws_common.iam import ec2_instances_read, ecs_cluster_read_policy
+from cdk.config import ServiceType
+from cdk.config.images import TRAEFIK_IMAGE
+from cdk.config.minecraft import EMAIL
 
 
 class TraefikService(Construct):

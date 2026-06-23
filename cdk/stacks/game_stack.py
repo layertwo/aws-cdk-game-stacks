@@ -17,8 +17,8 @@ from aws_cdk import aws_route53 as route53
 from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 
-from lib.aws_common.ec2 import create_security_group
-from lib.aws_common.iam import (
+from cdk.aws_common.ec2 import create_security_group
+from cdk.aws_common.iam import (
     ec2_instances_read,
     ecs_cluster_read_policy,
     ecs_cluster_update_policy,
@@ -26,7 +26,7 @@ from lib.aws_common.iam import (
     ssm_get_parameter_policy,
     ssm_put_parameter_policy,
 )
-from lib.config import GameProperties, PortType, ServiceType
+from cdk.config import GameProperties, PortType, ServiceType
 
 
 class GameStack(Stack):
