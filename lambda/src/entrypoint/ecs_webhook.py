@@ -56,7 +56,7 @@ def handler(event, context) -> dict:
 
         try:
             body = json.loads(event.get("body") or "{}")
-        except (json.JSONDecodeError, TypeError):
+        except json.JSONDecodeError, TypeError:
             return _response(400, {"error": "invalid body"})
         action = body.get("action")
     else:

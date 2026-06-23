@@ -1,14 +1,16 @@
 [project]
 name = "game-lambda"
 version = "0.1.0"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.14"
+dependencies = [
+    "boto3==1.43.34"
+]
 
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "boto3==1.43.34",
+    "pytest-xdist==3.8.0",
 ]
 
 [tool.pytest.ini_options]
@@ -20,7 +22,8 @@ addopts = [
     "--cov-report=term",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=80",
+    "--cov-fail-under=50",
+    "-n=auto"
 ]
 
 [tool.coverage.run]

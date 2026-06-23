@@ -1,4 +1,4 @@
-from lib.config import GameProperties
+from cdk.config import GameProperties
 
 BASE_KWARGS = dict(
     name="TestGame",

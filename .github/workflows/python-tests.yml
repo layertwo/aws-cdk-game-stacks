@@ -6,19 +6,19 @@ on:
     branches:
       - mainline
     paths:
-      - lib/**
+      - cdk/**
       - lambda/**
-      - test/**
+      - tests/**
       - .github/workflows/python-tests.yml
       - pyproject.toml
-      - poetry.lock
+      - uv.lock
 
 jobs:
   test:
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
-        python-version: ["3.13", "3.14"]
+        python-version: ["3.14"]
     permissions:
       contents: read
 
@@ -26,29 +26,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v7
 
-    - name: Install poetry
-      run: pipx install poetry
-
-    - name: Set up Python
-      uses: actions/setup-python@v6
+    - name: Install uv
+      uses: astral-sh/setup-uv@v8.2.0
       with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'poetry'
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: poetry install
-
-    - name: Build package
-      run: poetry build
+      run: uv sync --frozen --all-extras --all-groups
 
     - name: Check code formatting with black
-      run: poetry run black --check --diff lambda/ lib/ test/
+      run: uv run black --check --diff lambda/ cdk/ tests/
 
     - name: Check import sorting with isort
-      run: poetry run isort --check-only --diff lambda/ lib/ test/
+      run: uv run isort --check-only --diff lambda/ cdk/ tests/
 
-    - name: Run tests with coverage
-      run: poetry run pytest
+    - name: Run unit tests
+      run: uv run pytest
       env:
         COVERAGE_FILE: .coverage.${{ matrix.python-version }}
 

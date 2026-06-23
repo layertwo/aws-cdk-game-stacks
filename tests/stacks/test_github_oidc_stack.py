@@ -1,7 +1,7 @@
 from aws_cdk import App, Environment
 from aws_cdk.assertions import Match, Template
 
-from lib.stacks.github_oidc_stack import GithubOidcStack
+from cdk.stacks.github_oidc_stack import GithubOidcStack
 
 
 def test_github_oidc_stack_synth():

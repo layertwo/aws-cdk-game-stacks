@@ -19,16 +19,18 @@ name: deploy
 # https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - mainline
     paths:
-      - 'lib/**'
+      - 'cdk/**'
       - 'lambda/**'
       - '.github/workflows/deploy.yml'
       - 'pyproject.toml'
-      - 'poetry.lock'
-  workflow_dispatch:
+      - 'uv.lock'
+      - 'cdk.json'
+      - 'cdk.context.json'
 
 
 concurrency:
@@ -41,6 +43,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        python-version: ["3.14"]
     permissions:
       contents: read
       id-token: write  # Required for OIDC authentication
@@ -49,29 +54,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      # Python/Poetry Setup
-      - name: Install poetry
-        run:  pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
         with:
-            python-version: "3.14"
-            cache: 'poetry'
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      # Node.js/CDK Setup
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-extras --all-groups
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
       - name: Install dependencies
-        run: |
-            poetry install
-            npm install -g aws-cdk
-
-      - name: Build package
-        run: poetry build
+        run: npm install -g aws-cdk
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -80,10 +81,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Synthesize
-        run: poetry run cdk context --clear && poetry run cdk synth
+        run: uv run cdk context --clear && poetry run cdk synth
 
       - name: CDK Deploy
-        run: poetry run cdk deploy --all --require-approval never --outputs-file outputs.json
+        run: uv run cdk deploy --all --require-approval never --outputs-file outputs.json
 
       - name: Display deployment outputs
         run: |

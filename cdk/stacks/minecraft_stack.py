@@ -17,8 +17,8 @@ from cdk_monitoring_constructs import (
 )
 from constructs import Construct
 
-from lib.config import GameProperties, ServiceType
-from lib.stacks.game_stack import GameStack, PortType
+from cdk.config import GameProperties, ServiceType
+from cdk.stacks.game_stack import GameStack, PortType
 
 
 class MinecraftStack(GameStack):

@@ -1,6 +1,6 @@
 import pytest
 
-from lib.config import GamePort, GameProperties, PortType, ServiceType
+from cdk.config import GamePort, GameProperties, PortType, ServiceType
 
 
 @pytest.fixture
