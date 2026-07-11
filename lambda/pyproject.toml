@@ -3,7 +3,7 @@ name = "game-lambda"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "boto3==1.43.40"
+    "boto3==1.43.46"
 ]
 
 [dependency-groups]
