@@ -78,7 +78,7 @@ dev = [
 requires-dist = [
     { name = "aws-cdk-lib", specifier = "==2.261.0" },
     { name = "cdk-monitoring-constructs", specifier = "==10.1.0" },
-    { name = "constructs", specifier = "==10.6.0" },
+    { name = "constructs", specifier = "==10.7.0" },
     { name = "uv-python-lambda", specifier = "==0.0.7" },
 ]
 
@@ -185,16 +185,15 @@ wheels = [
 
 [[package]]
 name = "constructs"
-version = "10.6.0"
+version = "10.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsii" },
     { name = "publication" },
-    { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/13/f57364d14c818108a47e124d1a4cfbee7c9f69ab1263ab59a7087028be18/constructs-10.6.0.tar.gz", hash = "sha256:bc55d1d390142424861e5ff5c6b8c243c4bae18fe7302e0939c2003f329ba365", size = 68788, upload-time = "2026-03-23T09:00:54.242Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/87/fd63e959e0a4ebee76e620cceebe99d2093a54ce1f9f42aa9bb5ec14f0c1/constructs-10.7.0.tar.gz", hash = "sha256:e593ac6935f020e65f3a39ad73a6196cb30cb8080d80268471f06321e9317242", size = 70906, upload-time = "2026-07-15T16:04:42.306Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fc/38/6de46d122a2fcd275a5f1fa4ad1d8d2058afd6b72d8db5f0c125515cbb5c/constructs-10.6.0-py3-none-any.whl", hash = "sha256:ad4ffabdb53c17cde00fb94e441a1ba9fddac57c92ad49d263f8dbd416cec513", size = 66969, upload-time = "2026-03-23T09:00:53.041Z" },
+    { url = "https://files.pythonhosted.org/packages/b0/5a/3cacb1aba05ab167fd2ce3b6db46e5736c4c67c5bfbd81771797947b9bbd/constructs-10.7.0-py3-none-any.whl", hash = "sha256:4aaf04c6628fb9af71fd4bcd59d141c871eaa5aaf8f690a4b2dfd572f8bba053", size = 68945, upload-time = "2026-07-15T16:04:40.959Z" },
 ]
 
 [[package]]
@@ -290,7 +289,7 @@ wheels = [
 
 [[package]]
 name = "jsii"
-version = "1.137.0"
+version = "1.138.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -300,9 +299,9 @@ dependencies = [
     { name = "typeguard" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/db/00/fb7b05656d945a64bbc3cfa2027abe3df51666527d150a442ceb86d0d01c/jsii-1.137.0.tar.gz", hash = "sha256:6ac273e47b2066d29ef2f6c6a4131abddf5cbf9d772626d8b63040a9622302a6", size = 528873, upload-time = "2026-06-22T16:14:43.046Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/a8/a27839ee67130e3b911ebcd2f27c9d539fae2dd4ea2e87678c19b7a48685/jsii-1.138.0.tar.gz", hash = "sha256:575a389c56e4651f33fad0e0dafdc61d001a499d3cc0630cee734fc5e0b525ae", size = 531368, upload-time = "2026-07-02T13:42:11.264Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/bb/2f7c032b07243eab1b0df4325fa9ed7a09ee8b1cf742a1a34145a8803024/jsii-1.137.0-py3-none-any.whl", hash = "sha256:e6054da2b760c560b1f145195b71e85e9d87fb67f92270db27331bddb7eaf697", size = 501116, upload-time = "2026-06-22T16:14:41.435Z" },
+    { url = "https://files.pythonhosted.org/packages/11/c2/9198f328f95b8bbb946de5e5b4551316818c92167893a3b8343879f0e1e4/jsii-1.138.0-py3-none-any.whl", hash = "sha256:efc66b5831c8c41e343b644f03221d71480b69c3c39dc41df15659a01ce28fbb", size = 501697, upload-time = "2026-07-02T13:42:09.704Z" },
 ]
 
 [[package]]
