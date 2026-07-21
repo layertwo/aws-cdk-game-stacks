@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "aws-cdk-lib==2.261.0",
-    "cdk-monitoring-constructs==10.1.0",
+    "cdk-monitoring-constructs==10.2.0",
     "constructs==10.7.0",
     "uv-python-lambda==0.0.7"
 ]
