@@ -77,7 +77,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aws-cdk-lib", specifier = "==2.264.0" },
-    { name = "cdk-monitoring-constructs", specifier = "==10.3.2" },
+    { name = "cdk-monitoring-constructs", specifier = "==10.3.3" },
     { name = "constructs", specifier = "==10.8.1" },
     { name = "uv-python-lambda", specifier = "==0.0.7" },
 ]
@@ -147,7 +147,7 @@ wheels = [
 
 [[package]]
 name = "cdk-monitoring-constructs"
-version = "10.3.2"
+version = "10.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aws-cdk-lib" },
@@ -155,9 +155,9 @@ dependencies = [
     { name = "jsii" },
     { name = "publication" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/5b/9222069a649d9647c61312c1e0ca4af1514dfeeeca7bc03c6848225b951d/cdk_monitoring_constructs-10.3.2.tar.gz", hash = "sha256:cd49c50992a7a9d92552e94ed5ff448be22e1acd664214f2cb4b0cf984812d8c", size = 1578084, upload-time = "2026-10-13T21:28:04.685Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/28/69c4926bf2f488256c8406e209fa0372882986f80b63a46bf4d626d9fe36/cdk_monitoring_constructs-10.3.3.tar.gz", hash = "sha256:931a5343ec8c50c365e9711c64d4e1e02803e3e394c010399626f660c6da0d7b", size = 1578076, upload-time = "2026-10-27T04:31:38.053Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/e7/67fca09eb9a2097333239b096ae641b40ecb23606e262a19027f7ddb301f/cdk_monitoring_constructs-10.3.2-py3-none-any.whl", hash = "sha256:4e9942e60f244077027727818781b372712dc62c88ab47b0d9a5d0647ae8dbba", size = 1567119, upload-time = "2026-10-13T21:28:02.435Z" },
+    { url = "https://files.pythonhosted.org/packages/71/89/0368ef12a5495684ad3790437f29e88beb12cbb6829ad7b101d30a162b63/cdk_monitoring_constructs-10.3.3-py3-none-any.whl", hash = "sha256:f76201e47a203c790feb1128f00ef6e5b8f8b848ca408e4f11ea3c5dda13e08a", size = 1567072, upload-time = "2026-10-27T04:31:36.078Z" },
 ]
 
 [[package]]
